@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 
@@ -76,6 +77,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         holder.nameTV.setText(mDataset.get(position).getItems().first().getUser().getFull_name());
+
          holder.proPicIB.setImageUrl(mDataset.get(position).getItems().first().getUser().getProfilePicture(),VolleySingleton.getInstance().getImageLoader());
         holder.img1.setImageUrl(mDataset.get(position).getItems().first().getImages().getThumbnail().getUrl(),VolleySingleton.getInstance().getImageLoader());
         holder.img2.setImageUrl(mDataset.get(position).getItems().get(1).getImages().getThumbnail().getUrl(),VolleySingleton.getInstance().getImageLoader());

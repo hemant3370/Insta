@@ -10,7 +10,7 @@ import io.realm.annotations.*;
 @RealmClass
 public class ImageData extends RealmObject{
 
-	private String altMediaUrl;
+	private String alt_media_url;
 	private boolean canDeleteComments;
 	private boolean canViewComments;
 	private Caption caption;
@@ -26,11 +26,11 @@ public class ImageData extends RealmObject{
 	private From user;
 	private boolean userHasLiked;
 
-	public void setAltMediaUrl(String altMediaUrl){
-		this.altMediaUrl = altMediaUrl;
+	public void setAlt_media_url(String alt_media_url){
+		this.alt_media_url = alt_media_url;
 	}
-	public Object getAltMediaUrl(){
-		return this.altMediaUrl;
+	public String getAlt_media_url(){
+		return this.alt_media_url;
 	}
 	public void setCanDeleteComments(boolean canDeleteComments){
 		this.canDeleteComments = canDeleteComments;
@@ -128,7 +128,7 @@ public class ImageData extends RealmObject{
 			return null;
 		}
 		ImageData imageData = realm.createObject(ImageData.class);
-		imageData.altMediaUrl = (String) jsonObject.opt("alt_media_url");
+		imageData.alt_media_url = (String) jsonObject.opt("alt_media_url");
 		imageData.canDeleteComments = jsonObject.optBoolean("can_delete_comments");
 		imageData.canViewComments = jsonObject.optBoolean("can_view_comments");
 		imageData.caption = Caption.fromJson(realm, jsonObject.optJSONObject("caption"));
@@ -153,7 +153,7 @@ public class ImageData extends RealmObject{
 	{
 		JSONObject jsonObject = new JSONObject();
 		try {
-			jsonObject.put("alt_media_url", imageData.altMediaUrl);
+			jsonObject.put("alt_media_url", imageData.alt_media_url);
 			jsonObject.put("can_delete_comments", imageData.canDeleteComments);
 			jsonObject.put("can_view_comments", imageData.canViewComments);
 			jsonObject.put("caption", Caption.toJsonObject(imageData.caption));

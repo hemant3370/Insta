@@ -1,5 +1,9 @@
 package com.hsr.hemantsingh.insta;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -15,9 +19,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import com.android.volley.toolbox.NetworkImageView;
+
+import java.io.File;
+import java.io.IOException;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -59,41 +68,13 @@ public class ImageTabs extends AppCompatActivity {
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager.setOffscreenPageLimit(0);
 
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
     }
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_image_tabs, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     /**
      * A placeholder fragment containing a simple view.
@@ -105,7 +86,8 @@ public class ImageTabs extends AppCompatActivity {
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
         private static final String ARG_SECTION_URL = "section_url";
-
+        VideoView vv;
+        FloatingActionButton fab;
         public PlaceholderFragment() {
         }
 
@@ -123,14 +105,58 @@ public class ImageTabs extends AppCompatActivity {
             return fragment;
         }
 
+
+
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_image_tabs, container, false);
-            NetworkImageView imageView = (NetworkImageView) rootView.findViewById(R.id.imageView5);
-            imageView.setImageUrl(this.getArguments().getString(ARG_SECTION_URL), VolleySingleton.getInstance().getImageLoader());
+            vv = (VideoView) rootView.findViewById(R.id.videoView);
+            ImageView imageView = (ImageView) rootView.findViewById(R.id.imageView5);
+             fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (vv.isPlaying()){
+                       vv.pause();
+                    }
+                    else {
+                        vv.start();
+                    }
+                }
+            });
+            if (this.getArguments().getString(ARG_SECTION_URL).contains(".jpg")){
+                vv.setVisibility(View.INVISIBLE);
+                fab.setVisibility(View.INVISIBLE);
+//            imageView.setImageUrl(this.getArguments().getString(ARG_SECTION_URL), VolleySingleton.getInstance().getImageLoader());
+                imageView.setImageBitmap(BitmapFactory.decodeFile(this.getArguments().getString(ARG_SECTION_URL)));
+            }
+            else {
+                imageView.setVisibility(View.INVISIBLE);
+                vv.setVideoPath(this.getArguments().getString(ARG_SECTION_URL));
+                vv.seekTo(300);
+                vv.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (vv.isPlaying()) {
+                            vv.pause();
+
+                        }
+
+                        else {
+                            vv.start();
+                        }
+                    }
+                });
+            }
 
             return rootView;
+        }
+
+        @Override
+        public void onDetach() {
+            super.onDetach();
+            vv.stopPlayback();
         }
     }
 
@@ -153,19 +179,25 @@ public class ImageTabs extends AppCompatActivity {
 
 
             img = realm.where(User.class).equalTo("id", id).findAll().first().getItems();
+
         }
 
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1,img.get(position).getImages().getStandard_resolution().getUrl());
+            File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
+                    + "/" + img.get(position).getUser().getUsername() +"/");
+            return PlaceholderFragment.newInstance(position + 1,Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
+                    + "/" + img.get(position).getUser().getUsername() +"/" + folder.list()[position]);
         }
 
         @Override
         public int getCount() {
             // Show 3 total pages
-            return img.size();
+            File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
+                    + "/" + img.first().getUser().getUsername() +"/");
+            return folder.list().length;
         }
 
         @Override
@@ -173,5 +205,11 @@ public class ImageTabs extends AppCompatActivity {
 
             return img.get(position).getCaption().getText();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
     }
 }

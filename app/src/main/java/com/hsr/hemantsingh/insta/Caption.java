@@ -50,8 +50,8 @@ public class Caption extends RealmObject{
 		Caption caption = realm.createObject(Caption.class);
 		caption.createdTime = (String) jsonObject.opt("created_time");
 		caption.from = From.fromJson(realm, jsonObject.optJSONObject("from"));
-		caption.id = String.valueOf(jsonObject.opt("id"));
-		caption.text = String.valueOf(jsonObject.opt("text"));
+		caption.id = (String) jsonObject.opt("id");
+		caption.text = (String) jsonObject.opt("text");
 		return caption;
 	}
 

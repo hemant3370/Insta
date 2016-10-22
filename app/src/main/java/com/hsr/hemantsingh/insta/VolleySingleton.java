@@ -4,8 +4,11 @@ import android.graphics.Bitmap;
 import android.util.LruCache;
 
 import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
+
+import java.io.File;
 
 public class VolleySingleton {
     private static VolleySingleton sInstance = null;
@@ -16,7 +19,7 @@ public class VolleySingleton {
         mRequestQueue = Volley.newRequestQueue(MyApplication.getAppContext());
         mImageLoader = new ImageLoader(mRequestQueue, new ImageLoader.ImageCache() {
 
-            private LruCache<String, Bitmap> cache = new LruCache<>((int) (Runtime.getRuntime().maxMemory() / 1024) / 8);
+            private  LruCache<String, Bitmap> cache = new LruCache<>((int) (Runtime.getRuntime().maxMemory() / 1024) / 8);
 
             @Override
             public Bitmap getBitmap(String url) {

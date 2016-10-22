@@ -10,7 +10,7 @@
     tools:context="com.hsr.hemantsingh.insta.ImageTabs$PlaceholderFragment">
 
 
-    <com.android.volley.toolbox.NetworkImageView
+    <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:srcCompat="@mipmap/ic_launcher"
@@ -20,17 +20,24 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_above="@+id/textViewTitle" />
+        android:layout_alignParentBottom="true" />
 
-    <TextView
-        android:text="TextView"
+    <VideoView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/videoView"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        app:srcCompat="@android:drawable/ic_media_play"
         android:layout_alignParentBottom="true"
-        android:id="@+id/textViewTitle"
-        android:gravity="center"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="78dp" />
+
 </RelativeLayout>
