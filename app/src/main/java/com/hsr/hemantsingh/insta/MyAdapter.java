@@ -1,6 +1,7 @@
 package com.hsr.hemantsingh.insta;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -77,8 +78,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         holder.nameTV.setText(mDataset.get(position).getItems().first().getUser().getFull_name());
-
-         holder.proPicIB.setImageUrl(mDataset.get(position).getItems().first().getUser().getProfilePicture(),VolleySingleton.getInstance().getImageLoader());
+        Log.wtf( "onBindViewHolder: ", mDataset.get(position).getItems().first().getUser().getProfilePicture().replace("s150x150","s640x640"));
+         holder.proPicIB.setImageUrl(mDataset.get(position).getItems().first().getUser().getProfilePicture().replace("s150x150","s640x640"),VolleySingleton.getInstance().getImageLoader());
         holder.img1.setImageUrl(mDataset.get(position).getItems().first().getImages().getThumbnail().getUrl(),VolleySingleton.getInstance().getImageLoader());
         holder.img2.setImageUrl(mDataset.get(position).getItems().get(1).getImages().getThumbnail().getUrl(),VolleySingleton.getInstance().getImageLoader());
         holder.img3.setImageUrl(mDataset.get(position).getItems().get(2).getImages().getThumbnail().getUrl(),VolleySingleton.getInstance().getImageLoader());

@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -15,25 +16,24 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
+
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.VideoView;
 
-import com.android.volley.toolbox.NetworkImageView;
 
 import java.io.File;
-import java.io.IOException;
+
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmList;
-import io.realm.RealmResults;
 
-public class ImageTabs extends AppCompatActivity {
+import uk.co.senab.photoview.PhotoViewAttacher;
+
+public class ImageTabsActivity extends AppCompatActivity {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -60,15 +60,23 @@ public class ImageTabs extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         userId = getIntent().getStringExtra("id");
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder().name(Realm.DEFAULT_REALM_NAME)
+                .schemaVersion(0)
+                .deleteRealmIfMigrationNeeded()
+                .build();
+        Realm realm = Realm.getInstance(realmConfiguration);
 
+
+
+        setTitle(realm.where(User.class).equalTo("id", userId).findAll().first().getItems().first().getUser().getFull_name());
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), userId);
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), realm.where(User.class).equalTo("id", userId).findAll().first().getItems());
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        mViewPager.setOffscreenPageLimit(0);
+        mViewPager.setOffscreenPageLimit(3);
 
 
 
@@ -86,6 +94,7 @@ public class ImageTabs extends AppCompatActivity {
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
         private static final String ARG_SECTION_URL = "section_url";
+        private static  final  String ARG_SECTION_TITLE = "section_title";
         VideoView vv;
         FloatingActionButton fab;
         public PlaceholderFragment() {
@@ -95,30 +104,47 @@ public class ImageTabs extends AppCompatActivity {
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static PlaceholderFragment newInstance(int sectionNumber, String url) {
+        public static PlaceholderFragment newInstance(int sectionNumber, String url, String title) {
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             args.putString(ARG_SECTION_URL, url);
+            args.putString(ARG_SECTION_TITLE, title);
             fragment.setArguments(args);
 
             return fragment;
         }
 
+        public void setUserVisibleHint(boolean isVisibleToUser)
+        {
+            super.setUserVisibleHint(isVisibleToUser);
+            if (this.isVisible())
+            {
+                if (!isVisibleToUser)   // If we are becoming invisible, then...
+                {
+                    //pause or stop video
+                    vv.pause();
+                }
+
+            }
+        }
 
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_image_tabs, container, false);
+            TextView titleTV = (TextView) rootView.findViewById(R.id.textView);
             vv = (VideoView) rootView.findViewById(R.id.videoView);
-            ImageView imageView = (ImageView) rootView.findViewById(R.id.imageView5);
+            final PhotoViewAttacher mAttacher;
+            final ImageView imageView = (ImageView) rootView.findViewById(R.id.imageView5);
              fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     if (vv.isPlaying()){
                        vv.pause();
+
                     }
                     else {
                         vv.start();
@@ -126,30 +152,31 @@ public class ImageTabs extends AppCompatActivity {
                 }
             });
             if (this.getArguments().getString(ARG_SECTION_URL).contains(".jpg")){
-                vv.setVisibility(View.INVISIBLE);
-                fab.setVisibility(View.INVISIBLE);
-//            imageView.setImageUrl(this.getArguments().getString(ARG_SECTION_URL), VolleySingleton.getInstance().getImageLoader());
-                imageView.setImageBitmap(BitmapFactory.decodeFile(this.getArguments().getString(ARG_SECTION_URL)));
-            }
-            else {
-                imageView.setVisibility(View.INVISIBLE);
-                vv.setVideoPath(this.getArguments().getString(ARG_SECTION_URL));
-                vv.seekTo(300);
-                vv.setOnClickListener(new View.OnClickListener() {
+                vv.setVisibility(View.GONE);
+                fab.setVisibility(View.GONE);
+                mAttacher = new PhotoViewAttacher(imageView);
+                AltexImageDownloader.readFromDiskAsync(new File(this.getArguments().getString(ARG_SECTION_URL)), new AltexImageDownloader.OnImageReadListener() {
                     @Override
-                    public void onClick(View view) {
-                        if (vv.isPlaying()) {
-                            vv.pause();
+                    public void onImageRead(Bitmap bitmap) {
+                        imageView.setImageBitmap(bitmap);
+                        mAttacher.update();
+                    }
 
-                        }
-
-                        else {
-                            vv.start();
-                        }
+                    @Override
+                    public void onReadFailed() {
+                        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+                         imageView.setImageResource(R.mipmap.ic_launcher);
+                          mAttacher.update();
                     }
                 });
-            }
 
+            }
+            else {
+                imageView.setVisibility(View.GONE);
+                vv.setVideoPath(this.getArguments().getString(ARG_SECTION_URL));
+                vv.seekTo(200);
+            }
+             titleTV.setText(getArguments().getString(ARG_SECTION_TITLE));
             return rootView;
         }
 
@@ -168,17 +195,10 @@ public class ImageTabs extends AppCompatActivity {
 
         public RealmList<ImageData> img;
 
-        public SectionsPagerAdapter(FragmentManager fm, String id) {
+        public SectionsPagerAdapter(FragmentManager fm, RealmList<ImageData> data) {
             super(fm);
+            this.img = data;
 
-            RealmConfiguration realmConfiguration = new RealmConfiguration.Builder().name(Realm.DEFAULT_REALM_NAME)
-                    .schemaVersion(0)
-                    .deleteRealmIfMigrationNeeded()
-                    .build();
-            Realm realm = Realm.getInstance(realmConfiguration);
-
-
-            img = realm.where(User.class).equalTo("id", id).findAll().first().getItems();
 
         }
 
@@ -186,10 +206,11 @@ public class ImageTabs extends AppCompatActivity {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
+
             File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
                     + "/" + img.get(position).getUser().getUsername() +"/");
             return PlaceholderFragment.newInstance(position + 1,Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                    + "/" + img.get(position).getUser().getUsername() +"/" + folder.list()[position]);
+                    + "/" + img.get(position).getUser().getUsername() +"/" + folder.list()[position], img.get(position).getCaption() != null ? img.get(position).getCaption().getText().toString() : "");
         }
 
         @Override
@@ -203,7 +224,7 @@ public class ImageTabs extends AppCompatActivity {
         @Override
         public CharSequence getPageTitle(int position) {
 
-            return img.get(position).getCaption().getText();
+            return "";
         }
     }
 

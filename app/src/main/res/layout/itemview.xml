@@ -31,10 +31,7 @@
                 android:id="@+id/textViewName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
                 android:layout_alignTop="@+id/imageButton2"
-                android:layout_toEndOf="@+id/imageButton2"
                 android:layout_toRightOf="@+id/imageButton2"
                 android:paddingLeft="4dp"
                 android:paddingRight="4dp"
@@ -83,6 +80,7 @@
                 android:layout_alignLeft="@+id/imageView3"
                 android:layout_alignStart="@+id/imageView3"
                 android:id="@+id/imageView4" />
+
         </RelativeLayout>
     </android.support.v7.widget.CardView>
 

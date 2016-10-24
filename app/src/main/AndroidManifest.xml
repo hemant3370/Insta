@@ -4,6 +4,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
 
     <application
         android:name=".MyApplication"
@@ -23,7 +25,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ImageTabs"
+            android:name=".ImageTabsActivity"
             android:label="@string/title_activity_image_tabs"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>

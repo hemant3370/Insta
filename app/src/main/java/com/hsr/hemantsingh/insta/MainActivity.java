@@ -2,7 +2,10 @@ package com.hsr.hemantsingh.insta;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,6 +14,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -31,7 +35,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.artjimlop.altex.AltexImageDownloader;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -40,13 +44,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
-import io.realm.internal.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -55,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager mLayoutManager;
     public CustomItemClickListener listener;
     private Realm realm;
-
+    int count;
     RealmResults<User> results;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
          realm = Realm.getInstance(realmConfiguration);
 
-        Activity activity = this;
+        final Activity activity = this;
         String permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
         if(ActivityCompat.checkSelfPermission(activity, permission)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -83,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         listener = new CustomItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
-                Intent o = new Intent(MainActivity.this, ImageTabs.class);
+                Intent o = new Intent(MainActivity.this, ImageTabsActivity.class);
                 File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
                         + "/" + results.get(position).getItems().first().getUser().getUsername() +"/");
                 for (String str :
@@ -108,7 +112,15 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 o.putExtra("id", results.get(position).getItems().first().getUser().getId());
-                startActivity(o);
+                Bundle bundle = null;
+
+                if (activity != null) {
+                    ActivityOptionsCompat options =
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(activity, v.findViewById(R.id.imageButton2), "imagetoimage");
+                    bundle = options.toBundle();
+                }
+                activity.startActivity(o, bundle);
+//                startActivity(o);
             }
         };
 
@@ -228,15 +240,20 @@ public class MainActivity extends AppCompatActivity {
         //dialog.show();
         final ProgressDialog pd = new ProgressDialog(MainActivity.this);
         pd.setTitle("Fetching");
+
+        pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        pd.setProgress(0);
+        pd.setSecondaryProgress(0);
         pd.show();
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
+
                 (Request.Method.GET, volleyUrl, null, new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
                             JSONArray array = response.getJSONArray("items");
-                            int count = array.length();
+                           count = array.length();
                             if (count > 0 ) {
                                 Gson gson = new GsonBuilder().create();
                                     String json = response.toString();
@@ -244,23 +261,8 @@ public class MainActivity extends AppCompatActivity {
                                 realm.beginTransaction();
                                 u.setId(u.getItems().first().getUser().getId());
                                 realm.commitTransaction();
-                                final AltexImageDownloader downloader = new AltexImageDownloader(new AltexImageDownloader.OnImageLoaderListener() {
-                                    @Override
-                                    public void onError(AltexImageDownloader.ImageError error) {
-                                        // Here you should show something to the user, right?
-                                    }
 
-                                    @Override
-                                    public void onProgressChange(int percent) {
-                                        // Here you can show the percentage of progress and stuff
-                                        pd.setProgress(percent);
-                                    }
 
-                                    @Override
-                                    public void onComplete(Bitmap result) {
-                                        // Do whatever you want, mate
-                                    }
-                                });
                                 for (ImageData img:
                                     u.getItems() ) {
                                     if (img.getCaption() != null && img.getCaption().getText() != null){
@@ -268,13 +270,27 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                     if (img.getType().contains("video")){
 
-                                        downloader.writeToDisk(MainActivity.this, img.getAlt_media_url(), volleyUrl.split("/")[3].trim() + "/");
+
+                                        AltexImageDownloader.writeToDisk(MainActivity.this, img.getAlt_media_url(), volleyUrl.split("/")[3].trim() + "/");
+
                                     }
                                     else {
-                                        downloader.writeToDisk(MainActivity.this, img.getImages().getStandard_resolution().getUrl(), volleyUrl.split("/")[3].trim() + "/");
+                                        AltexImageDownloader.writeToDisk(MainActivity.this, img.getImages().getStandard_resolution().getUrl().replace("s640x640","s1080x1080"), volleyUrl.split("/")[3].trim() + "/");
                                     }
                                 }
-
+                                new Timer().scheduleAtFixedRate(new TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
+                                                + "/" + u.getItems().first().getUser().getUsername() +"/");
+                                        if (folder.list().length * (100/count) > 90){
+                                            pd.dismiss();
+                                        }
+                                        else {
+                                            pd.setProgress(folder.list().length * (100/count));
+                                        }
+                                    }
+                                },250,500);
 
                                 if (checkIfExists(u.getItems().first().getId()) == false) {
                                     realm.beginTransaction();
@@ -284,13 +300,7 @@ public class MainActivity extends AppCompatActivity {
                                 results = realm.where(User.class).findAll();
                                 mAdapter = new MyAdapter(results, listener);
                                 mRecyclerView.setAdapter(mAdapter);
-                                MainActivity.this.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        pd.hide();
-                                        pd.dismiss();
-                                    }
-                                });
+
 
                             }
                         } catch (JSONException e) {
