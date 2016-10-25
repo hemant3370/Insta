@@ -1,36 +1,31 @@
 package com.hsr.hemantsingh.insta;
 
+import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.os.Environment;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.VideoView;
 
+import com.hsr.hemantsingh.insta.playpause.PlayPauseView;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
-
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmList;
-
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class ImageTabsActivity extends AppCompatActivity {
@@ -50,7 +45,7 @@ public class ImageTabsActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
     private String userId;
-
+    TextView imageTitleTV;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,8 +59,8 @@ public class ImageTabsActivity extends AppCompatActivity {
                 .schemaVersion(0)
                 .deleteRealmIfMigrationNeeded()
                 .build();
-        Realm realm = Realm.getInstance(realmConfiguration);
-
+        final Realm realm = Realm.getInstance(realmConfiguration);
+        imageTitleTV = (TextView) findViewById(R.id.textView);
 
 
         setTitle(realm.where(User.class).equalTo("id", userId).findAll().first().getItems().first().getUser().getFull_name());
@@ -76,9 +71,26 @@ public class ImageTabsActivity extends AppCompatActivity {
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        mViewPager.setOffscreenPageLimit(3);
+        mViewPager.setCurrentItem(getIntent().getIntExtra("index", 0));
+//        mViewPager.setOffscreenPageLimit(3);
+//        mViewPager.setPageTransformer(true, new CubeOutTransformer());
+          mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+              @Override
+              public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
+              }
 
+              @Override
+              public void onPageSelected(int position) {
+
+                  imageTitleTV.setText(realm.where(User.class).equalTo("id", userId).findAll().first().getItems().get(position).getCaption() != null ? realm.where(User.class).equalTo("id", userId).findAll().first().getItems().get(position).getCaption().getText() : "");
+              }
+
+              @Override
+              public void onPageScrollStateChanged(int state) {
+
+              }
+          });
 
     }
 
@@ -96,8 +108,10 @@ public class ImageTabsActivity extends AppCompatActivity {
         private static final String ARG_SECTION_URL = "section_url";
         private static  final  String ARG_SECTION_TITLE = "section_title";
         VideoView vv;
-        FloatingActionButton fab;
+        PlayPauseView fab;
+
         public PlaceholderFragment() {
+
         }
 
         /**
@@ -124,6 +138,10 @@ public class ImageTabsActivity extends AppCompatActivity {
                 {
                     //pause or stop video
                     vv.pause();
+//                    fab.toggle();
+                }
+                else {
+                    vv.start();
                 }
 
             }
@@ -134,49 +152,54 @@ public class ImageTabsActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_image_tabs, container, false);
-            TextView titleTV = (TextView) rootView.findViewById(R.id.textView);
+//            TextView titleTV = (TextView) rootView.findViewById(R.id.textView);
             vv = (VideoView) rootView.findViewById(R.id.videoView);
             final PhotoViewAttacher mAttacher;
-            final ImageView imageView = (ImageView) rootView.findViewById(R.id.imageView5);
-             fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
+            final ImageView imageView = (ImageView) rootView.findViewById(R.id.ivProfile);
+             fab = (PlayPauseView) rootView.findViewById(R.id.fab);
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     if (vv.isPlaying()){
                        vv.pause();
-
+                        fab.toggle();
                     }
                     else {
                         vv.start();
+                        fab.toggle();
                     }
                 }
             });
+            imageView.setMinimumHeight(MyApplication.getInstance().getMetrics().widthPixels);
             if (this.getArguments().getString(ARG_SECTION_URL).contains(".jpg")){
                 vv.setVisibility(View.GONE);
                 fab.setVisibility(View.GONE);
                 mAttacher = new PhotoViewAttacher(imageView);
-                AltexImageDownloader.readFromDiskAsync(new File(this.getArguments().getString(ARG_SECTION_URL)), new AltexImageDownloader.OnImageReadListener() {
-                    @Override
-                    public void onImageRead(Bitmap bitmap) {
-                        imageView.setImageBitmap(bitmap);
-                        mAttacher.update();
-                    }
-
-                    @Override
-                    public void onReadFailed() {
-                        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-                         imageView.setImageResource(R.mipmap.ic_launcher);
-                          mAttacher.update();
-                    }
-                });
+//                imageView.setImageBitmap(AltexImageDownloader.readFromDisk(new File(this.getArguments().getString(ARG_SECTION_URL))));
+//                mAttacher.update();
+                 Picasso.with(getContext()).load(new File(this.getArguments().getString(ARG_SECTION_URL))).fit().into(imageView);
+//                AltexImageDownloader.readFromDiskAsync(new File(this.getArguments().getString(ARG_SECTION_URL)), new AltexImageDownloader.OnImageReadListener() {
+//                    @Override
+//                    public void onImageRead(Bitmap bitmap) {
+//                        imageView.setImageBitmap(bitmap);
+//                        mAttacher.update();
+//                    }
+//
+//                    @Override
+//                    public void onReadFailed() {
+//                        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+//                         imageView.setImageResource(R.mipmap.ic_launcher);
+//                          mAttacher.update();
+//                    }
+//                });
 
             }
             else {
                 imageView.setVisibility(View.GONE);
                 vv.setVideoPath(this.getArguments().getString(ARG_SECTION_URL));
-                vv.seekTo(200);
+
             }
-             titleTV.setText(getArguments().getString(ARG_SECTION_TITLE));
+//             titleTV.setText(getArguments().getString(ARG_SECTION_TITLE));
             return rootView;
         }
 
@@ -208,9 +231,9 @@ public class ImageTabsActivity extends AppCompatActivity {
             // Return a PlaceholderFragment (defined as a static inner class below).
 
             File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                    + "/" + img.get(position).getUser().getUsername() +"/");
-            return PlaceholderFragment.newInstance(position + 1,Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                    + "/" + img.get(position).getUser().getUsername() +"/" + folder.list()[position], img.get(position).getCaption() != null ? img.get(position).getCaption().getText().toString() : "");
+                    + "/" + img.first().getUser().getUsername() +"/");
+            return PlaceholderFragment.newInstance(position ,Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
+                    + "/" + img.first().getUser().getUsername() +"/" + folder.list()[position], (   position < img.size() && img.get(position).getCaption() != null)? img.get(position).getCaption().getText().toString() : "");
         }
 
         @Override

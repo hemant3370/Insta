@@ -10,15 +10,15 @@ import io.realm.annotations.*;
 @RealmClass
 public class Image extends RealmObject{
 
-	private LowResolution lowResolution;
+	private LowResolution low_resolution;
 	private LowResolution standard_resolution;
 	private LowResolution thumbnail;
 
-	public void setLowResolution(LowResolution lowResolution){
-		this.lowResolution = lowResolution;
+	public void setLow_resolution(LowResolution low_resolution){
+		this.low_resolution = low_resolution;
 	}
-	public LowResolution getLowResolution(){
-		return this.lowResolution;
+	public LowResolution getLow_resolution(){
+		return this.low_resolution;
 	}
 	public void setStandard_resolution(LowResolution standard_resolution){
 		this.standard_resolution = standard_resolution;
@@ -41,7 +41,7 @@ public class Image extends RealmObject{
 			return null;
 		}
 		Image image = realm.createObject(Image.class);
-		image.lowResolution = LowResolution.fromJson(realm, jsonObject.optJSONObject("low_resolution"));
+		image.low_resolution = LowResolution.fromJson(realm, jsonObject.optJSONObject("low_resolution"));
 		image.standard_resolution = LowResolution.fromJson(realm, jsonObject.optJSONObject("standard_resolution"));
 		image.thumbnail = LowResolution.fromJson(realm, jsonObject.optJSONObject("thumbnail"));
 		return image;
@@ -54,7 +54,7 @@ public class Image extends RealmObject{
 	{
 		JSONObject jsonObject = new JSONObject();
 		try {
-			jsonObject.put("low_resolution", LowResolution.toJsonObject(image.lowResolution));
+			jsonObject.put("low_resolution", LowResolution.toJsonObject(image.low_resolution));
 			jsonObject.put("standard_resolution", LowResolution.toJsonObject(image.standard_resolution));
 			jsonObject.put("thumbnail", LowResolution.toJsonObject(image.thumbnail));
 		} catch (JSONException e) {

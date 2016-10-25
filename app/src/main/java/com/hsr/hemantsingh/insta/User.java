@@ -30,6 +30,9 @@ public class User extends RealmObject {
     public void setItems(RealmList<ImageData> items){
         this.items = items;
     }
+    public void addItem(ImageData item){
+        this.items.add(item);
+    }
     public RealmList<ImageData> getItems(){
         return this.items;
     }

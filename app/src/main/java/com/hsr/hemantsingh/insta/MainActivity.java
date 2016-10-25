@@ -2,40 +2,37 @@ package com.hsr.hemantsingh.insta;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.DownloadManager;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.test.espresso.core.deps.guava.primitives.Booleans;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -56,9 +53,12 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
+    private GridLayoutManager mLayoutManager;
     public CustomItemClickListener listener;
     private Realm realm;
+    ProgressDialog pd;
+    AlertDialog name;
+    AutoCompleteTextView txtUrl ;
     int count;
     RealmResults<User> results;
     @Override
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
                 .deleteRealmIfMigrationNeeded()
                 .build();
          realm = Realm.getInstance(realmConfiguration);
-
+        txtUrl = new AutoCompleteTextView(this);
         final Activity activity = this;
         String permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
         if(ActivityCompat.checkSelfPermission(activity, permission)
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         listener = new CustomItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
-                Intent o = new Intent(MainActivity.this, ImageTabsActivity.class);
+                Intent o = new Intent(MainActivity.this, GridActivity.class);
                 File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
                         + "/" + results.get(position).getItems().first().getUser().getUsername() +"/");
                 for (String str :
@@ -112,15 +112,15 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 o.putExtra("id", results.get(position).getItems().first().getUser().getId());
-                Bundle bundle = null;
+//                Bundle bundle = null;
 
-                if (activity != null) {
-                    ActivityOptionsCompat options =
-                            ActivityOptionsCompat.makeSceneTransitionAnimation(activity, v.findViewById(R.id.imageButton2), "imagetoimage");
-                    bundle = options.toBundle();
-                }
-                activity.startActivity(o, bundle);
-//                startActivity(o);
+//                if (activity != null) {
+//                    ActivityOptionsCompat options =
+//                            ActivityOptionsCompat.makeSceneTransitionAnimation(activity, v.findViewById(R.id.imageButton2), "imagetoimage");
+//                    bundle = options.toBundle();
+//                }
+//                activity.startActivity(o, bundle);
+                startActivity(o);
             }
         };
 
@@ -129,9 +129,14 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setHasFixedSize(true);
 
         // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(this);
+        if(activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+            mLayoutManager = new GridLayoutManager(this,2);
+        }
+        else{
+            mLayoutManager = new GridLayoutManager(this,3);
+        }
         mRecyclerView.setLayoutManager(mLayoutManager);
-        final AutoCompleteTextView txtUrl = new AutoCompleteTextView(this);
+
 
           final String[] COUNTRIES = new String[]{
 
@@ -147,9 +152,9 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                  if (charSequence.length() > 3){
+
                       jsonSuggestionVolley(charSequence.toString(), adapter);
-                  }
+
             }
 
             @Override
@@ -161,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
         txtUrl.setHint("Type Instagram username");
 
         // specify an adapter (see also next example)
-         final AlertDialog name = new AlertDialog.Builder(this)
+          name = new AlertDialog.Builder(this)
                  .setTitle("Download Pics")
                  .setMessage("Enter the Instagram username")
                  .setView(txtUrl)
@@ -169,8 +174,8 @@ public class MainActivity extends AppCompatActivity {
                      public void onClick(DialogInterface dialog, int whichButton) {
                          String url = txtUrl.getText().toString();
                          if (url.length() > 0) {
-
-                             jsonRequestVolley("https://www.instagram.com/" + url + "/media/");
+                             showPD();
+                             jsonRequestVolley("https://www.instagram.com/" + url + "/media/?&");
                          }
                      }
                  })
@@ -179,19 +184,14 @@ public class MainActivity extends AppCompatActivity {
                      }
                  }).create();
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                txtUrl.setText("");
-                name.show();
-            }
-        });
+
+
         txtUrl.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 name.dismiss();
-                jsonRequestVolley("https://www.instagram.com/" + adapter.getItem(i).toString() + "/media/");
+                showPD();
+                jsonRequestVolley("https://www.instagram.com/" + adapter.getItem(i).toString() + "/media/?&");
             }
         });
         results = realm.where(User.class).findAll();
@@ -202,6 +202,15 @@ public class MainActivity extends AppCompatActivity {
         else{
             name.show();
         }
+    }
+    public void showPD(){
+    pd = new ProgressDialog(MainActivity.this);
+        pd.setTitle("Fetching");
+
+        pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        pd.setProgress(0);
+        pd.setSecondaryProgress(0);
+        pd.show();
     }
     public void jsonSuggestionVolley(String str, final ArrayAdapter<String> adapter){
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
@@ -236,15 +245,13 @@ public class MainActivity extends AppCompatActivity {
         // Access the RequestQueue through your singleton class.
         VolleySingleton.getInstance().getRequestQueue().add(jsObjRequest);
     }
+    public void fabClick(View v){
+        txtUrl.setText("");
+        name.show();
+    }
     public void jsonRequestVolley(final String volleyUrl) {
         //dialog.show();
-        final ProgressDialog pd = new ProgressDialog(MainActivity.this);
-        pd.setTitle("Fetching");
 
-        pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        pd.setProgress(0);
-        pd.setSecondaryProgress(0);
-        pd.show();
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
 
                 (Request.Method.GET, volleyUrl, null, new Response.Listener<JSONObject>() {
@@ -253,6 +260,8 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
                         try {
                             JSONArray array = response.getJSONArray("items");
+                            Boolean more = response.getBoolean("more_available");
+
                            count = array.length();
                             if (count > 0 ) {
                                 Gson gson = new GsonBuilder().create();
@@ -262,12 +271,13 @@ public class MainActivity extends AppCompatActivity {
                                 u.setId(u.getItems().first().getUser().getId());
                                 realm.commitTransaction();
 
-
+//                                AltexImageDownloader.writeToDisk(MainActivity.this, u.getItems().first().getUser().getProfilePicture().replace("s150x150","s1080x1080"), volleyUrl.split("/")[3].trim() + "/");
                                 for (ImageData img:
                                     u.getItems() ) {
                                     if (img.getCaption() != null && img.getCaption().getText() != null){
                                         pd.setMessage("Downloading " + img.getCaption().getText());
                                     }
+
                                     if (img.getType().contains("video")){
 
 
@@ -278,6 +288,7 @@ public class MainActivity extends AppCompatActivity {
                                         AltexImageDownloader.writeToDisk(MainActivity.this, img.getImages().getStandard_resolution().getUrl().replace("s640x640","s1080x1080"), volleyUrl.split("/")[3].trim() + "/");
                                     }
                                 }
+
                                 new Timer().scheduleAtFixedRate(new TimerTask() {
                                     @Override
                                     public void run() {
@@ -287,20 +298,43 @@ public class MainActivity extends AppCompatActivity {
                                             pd.dismiss();
                                         }
                                         else {
-                                            pd.setProgress(folder.list().length * (100/count));
+                                            pd.incrementProgressBy(5);
                                         }
                                     }
                                 },250,500);
 
-                                if (checkIfExists(u.getItems().first().getId()) == false) {
+                                if (checkIfExists(u.getItems().first().getUser().getId()) == false) {
                                     realm.beginTransaction();
                                     realm.copyToRealm(u);
                                     realm.commitTransaction();
                                 }
+                                else {
+
+                                    for (ImageData img:
+                                            u.getItems() ) {
+                                        realm.beginTransaction();
+                                        realm.where(User.class).findAll().first().addItem(img);
+                                        realm.commitTransaction();
+                                    }
+                                }
                                 results = realm.where(User.class).findAll();
+                                if(MainActivity.this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+                                    mLayoutManager = new GridLayoutManager(MainActivity.this,3);
+                                }
+                                else{
+                                    mLayoutManager = new GridLayoutManager(MainActivity.this,5);
+                                }
                                 mAdapter = new MyAdapter(results, listener);
                                 mRecyclerView.setAdapter(mAdapter);
+                                if (more == true) {
+                                    pd.dismiss();
+                                    jsonRequestVolley(volleyUrl.split("min_id")[0] + "max_id=" + u.getItems().last().getId());
+                                }
 
+                            }
+                            else {
+                                pd.dismiss();
+                                Toast.makeText(MainActivity.this, "No Images Found", Toast.LENGTH_SHORT);
 
                             }
                         } catch (JSONException e) {
@@ -335,7 +369,7 @@ public class MainActivity extends AppCompatActivity {
     }
     public boolean checkIfExists(String id){
 
-        RealmQuery<ImageData> query = realm.where(ImageData.class)
+        RealmQuery<User> query = realm.where(User.class)
                 .equalTo("id", id);
 
         return query.count() != 0;
@@ -351,7 +385,9 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             realm.beginTransaction();
             realm.deleteAll();
-            mAdapter.notifyDataSetChanged();
+            if (mAdapter != null) {
+                mAdapter.notifyDataSetChanged();
+            }
             realm.commitTransaction();
             return true;
         }

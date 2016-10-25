@@ -27,18 +27,16 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     public static class ViewHolder extends RecyclerView.ViewHolder implements  CustomItemClickListener {
         // each data item is just a string in this case
         public View mItemView;
-        public  TextView nameTV;
-        public NetworkImageView proPicIB,img1,img2,img3,img4;
+        public  TextView nameTV, followerTV;
+
+        public NetworkImageView proPicIB;
 
         public ViewHolder(View v) {
             super(v);
             mItemView = v;
             nameTV = (TextView) v.findViewById(R.id.textViewName);
             proPicIB = (NetworkImageView) v.findViewById(R.id.imageButton2);
-            img1 = (NetworkImageView) v.findViewById(R.id.imageView);
-            img2 = (NetworkImageView) v.findViewById(R.id.imageView2);
-            img3 = (NetworkImageView) v.findViewById(R.id.imageView3);
-            img4 = (NetworkImageView) v.findViewById(R.id.imageView4);
+            followerTV = (TextView) v.findViewById(R.id.textViewFollowers);
         }
 
         @Override
@@ -80,10 +78,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         holder.nameTV.setText(mDataset.get(position).getItems().first().getUser().getFull_name());
         Log.wtf( "onBindViewHolder: ", mDataset.get(position).getItems().first().getUser().getProfilePicture().replace("s150x150","s640x640"));
          holder.proPicIB.setImageUrl(mDataset.get(position).getItems().first().getUser().getProfilePicture().replace("s150x150","s640x640"),VolleySingleton.getInstance().getImageLoader());
-        holder.img1.setImageUrl(mDataset.get(position).getItems().first().getImages().getThumbnail().getUrl(),VolleySingleton.getInstance().getImageLoader());
-        holder.img2.setImageUrl(mDataset.get(position).getItems().get(1).getImages().getThumbnail().getUrl(),VolleySingleton.getInstance().getImageLoader());
-        holder.img3.setImageUrl(mDataset.get(position).getItems().get(2).getImages().getThumbnail().getUrl(),VolleySingleton.getInstance().getImageLoader());
-        holder.img4.setImageUrl(mDataset.get(position).getItems().get(3).getImages().getThumbnail().getUrl(),VolleySingleton.getInstance().getImageLoader());
+        holder.followerTV.setText(mDataset.get(position).getItems().first().getUser().getUsername());
 
 
     }

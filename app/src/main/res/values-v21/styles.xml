@@ -8,9 +8,11 @@
         <!-- enable window content transitions -->
         <item name="android:windowActivityTransitions">true</item>
 
+
         <!-- specify enter and exit transitions -->
         <item name="android:windowEnterTransition">@android:transition/explode</item>
         <item name="android:windowExitTransition">@android:transition/fade</item>
+
 
     </style>
 
