@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 
-import io.realm.Realm;
+import io.realm.*;
 
 
 /**

@@ -1,4 +1,4 @@
-package com.hsr.hemantsingh.insta;//
+package com.hsr.hemantsingh.insta.Models;//
 //	Caption.java
 //	Model file generated using JSONExport: https://github.com/Ahmed-Ali/JSONExport
 

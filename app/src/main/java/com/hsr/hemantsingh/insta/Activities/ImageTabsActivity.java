@@ -1,8 +1,5 @@
-package com.hsr.hemantsingh.insta;
+package com.hsr.hemantsingh.insta.Activities;
 
-import android.app.Application;
-import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
@@ -18,6 +15,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.VideoView;
 
+import com.hsr.hemantsingh.insta.Models.ImageData;
+import com.hsr.hemantsingh.insta.Models.User;
+import com.hsr.hemantsingh.insta.MyApplication;
+import com.hsr.hemantsingh.insta.R;
 import com.hsr.hemantsingh.insta.playpause.PlayPauseView;
 import com.squareup.picasso.Picasso;
 
@@ -217,10 +218,14 @@ public class ImageTabsActivity extends AppCompatActivity {
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
         public RealmList<ImageData> img;
+        public String[] imgNameList;
 
         public SectionsPagerAdapter(FragmentManager fm, RealmList<ImageData> data) {
             super(fm);
             this.img = data;
+            File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
+                    + "/" + img.first().getUser().getUsername() +"/");
+            imgNameList =  folder.list();
 
 
         }
@@ -230,18 +235,16 @@ public class ImageTabsActivity extends AppCompatActivity {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
 
-            File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                    + "/" + img.first().getUser().getUsername() +"/");
+
             return PlaceholderFragment.newInstance(position ,Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                    + "/" + img.first().getUser().getUsername() +"/" + folder.list()[position], (   position < img.size() && img.get(position).getCaption() != null)? img.get(position).getCaption().getText().toString() : "");
+                    + "/" + img.first().getUser().getUsername() +"/" + imgNameList[position], (   position < img.size() && img.get(position).getCaption() != null)? img.get(position).getCaption().getText().toString() : "");
         }
 
         @Override
         public int getCount() {
             // Show 3 total pages
-            File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                    + "/" + img.first().getUser().getUsername() +"/");
-            return folder.list().length;
+
+            return imgNameList.length;
         }
 
         @Override

@@ -1,16 +1,17 @@
-package com.hsr.hemantsingh.insta;
+package com.hsr.hemantsingh.insta.Adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.hsr.hemantsingh.insta.Models.User;
+import com.hsr.hemantsingh.insta.R;
+import com.hsr.hemantsingh.insta.Networking.VolleySingleton;
+import com.hsr.hemantsingh.insta.listeners.CustomItemClickListener;
 
 import java.util.List;
 
@@ -46,7 +47,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public MyAdapter(List<User> myDataset,CustomItemClickListener listener) {
+    public MyAdapter(List<User> myDataset, CustomItemClickListener listener) {
         mDataset = myDataset;
         this.listener = listener;
     }
@@ -77,7 +78,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         // - replace the contents of the view with that element
         holder.nameTV.setText(mDataset.get(position).getItems().first().getUser().getFull_name());
         Log.wtf( "onBindViewHolder: ", mDataset.get(position).getItems().first().getUser().getProfilePicture().replace("s150x150","s640x640"));
-         holder.proPicIB.setImageUrl(mDataset.get(position).getItems().first().getUser().getProfilePicture().replace("s150x150","s640x640"),VolleySingleton.getInstance().getImageLoader());
+         holder.proPicIB.setImageUrl(mDataset.get(position).getItems().first().getUser().getProfilePicture().replace("s150x150","s640x640"), VolleySingleton.getInstance().getImageLoader());
         holder.followerTV.setText(mDataset.get(position).getItems().first().getUser().getUsername());
 
 

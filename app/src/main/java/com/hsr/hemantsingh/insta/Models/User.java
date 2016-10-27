@@ -1,4 +1,4 @@
-package com.hsr.hemantsingh.insta;
+package com.hsr.hemantsingh.insta.Models;
 
 import org.json.*;
 import io.realm.*;

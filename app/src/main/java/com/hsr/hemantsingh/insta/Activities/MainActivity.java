@@ -1,17 +1,16 @@
-package com.hsr.hemantsingh.insta;
+package com.hsr.hemantsingh.insta.Activities;
 
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.test.espresso.core.deps.guava.primitives.Booleans;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -35,14 +34,20 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.hsr.hemantsingh.insta.Networking.AltexImageDownloader;
+import com.hsr.hemantsingh.insta.Models.ImageData;
+import com.hsr.hemantsingh.insta.Models.User;
+import com.hsr.hemantsingh.insta.Adapters.MyAdapter;
+import com.hsr.hemantsingh.insta.MyApplication;
+import com.hsr.hemantsingh.insta.R;
+import com.hsr.hemantsingh.insta.Networking.VolleySingleton;
+import com.hsr.hemantsingh.insta.listeners.CustomItemClickListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -208,8 +213,7 @@ public class MainActivity extends AppCompatActivity {
         pd.setTitle("Fetching");
 
         pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        pd.setProgress(0);
-        pd.setSecondaryProgress(0);
+        pd.setIndeterminate(true);
         pd.show();
     }
     public void jsonSuggestionVolley(String str, final ArrayAdapter<String> adapter){
@@ -260,8 +264,10 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
                         try {
                             JSONArray array = response.getJSONArray("items");
-                            Boolean more = response.getBoolean("more_available");
 
+                            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                            Boolean hdBool = sharedPref.getBoolean("fullhdkey", false);
+                            Boolean downloadVideo = sharedPref.getBoolean("videokey", false);
                            count = array.length();
                             if (count > 0 ) {
                                 Gson gson = new GsonBuilder().create();
@@ -272,51 +278,34 @@ public class MainActivity extends AppCompatActivity {
                                 realm.commitTransaction();
 
 //                                AltexImageDownloader.writeToDisk(MainActivity.this, u.getItems().first().getUser().getProfilePicture().replace("s150x150","s1080x1080"), volleyUrl.split("/")[3].trim() + "/");
-                                for (ImageData img:
-                                    u.getItems() ) {
-                                    if (img.getCaption() != null && img.getCaption().getText() != null){
-                                        pd.setMessage("Downloading " + img.getCaption().getText());
-                                    }
-
-                                    if (img.getType().contains("video")){
-
-
-                                        AltexImageDownloader.writeToDisk(MainActivity.this, img.getAlt_media_url(), volleyUrl.split("/")[3].trim() + "/");
-
-                                    }
-                                    else {
-                                        AltexImageDownloader.writeToDisk(MainActivity.this, img.getImages().getStandard_resolution().getUrl().replace("s640x640","s1080x1080"), volleyUrl.split("/")[3].trim() + "/");
-                                    }
-                                }
-
-                                new Timer().scheduleAtFixedRate(new TimerTask() {
-                                    @Override
-                                    public void run() {
-                                        File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                                                + "/" + u.getItems().first().getUser().getUsername() +"/");
-                                        if (folder.list().length * (100/count) > 90){
-                                            pd.dismiss();
-                                        }
-                                        else {
-                                            pd.incrementProgressBy(5);
-                                        }
-                                    }
-                                },250,500);
-
                                 if (checkIfExists(u.getItems().first().getUser().getId()) == false) {
                                     realm.beginTransaction();
                                     realm.copyToRealm(u);
                                     realm.commitTransaction();
-                                }
-                                else {
-
                                     for (ImageData img:
                                             u.getItems() ) {
-                                        realm.beginTransaction();
-                                        realm.where(User.class).findAll().first().addItem(img);
-                                        realm.commitTransaction();
+
+
+                                        if (img.getType().contains("video") && downloadVideo){
+
+
+                                            AltexImageDownloader.writeToDisk(MyApplication.getAppContext(), img.getAlt_media_url(), volleyUrl.split("/")[3].trim() + "/");
+
+                                        }
+                                        else {
+
+
+                                            if (hdBool) {
+                                                AltexImageDownloader.writeToDisk(MyApplication.getAppContext(), img.getImages().getStandard_resolution().getUrl().replace("s640x640", "s1080x1080"), volleyUrl.split("/")[3].trim() + "/");
+                                            }
+                                            else{
+                                                AltexImageDownloader.writeToDisk(MyApplication.getAppContext(), img.getImages().getStandard_resolution().getUrl(), volleyUrl.split("/")[3].trim() + "/");
+
+                                            }
+                                        }
                                     }
                                 }
+
                                 results = realm.where(User.class).findAll();
                                 if(MainActivity.this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
                                     mLayoutManager = new GridLayoutManager(MainActivity.this,3);
@@ -326,13 +315,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 mAdapter = new MyAdapter(results, listener);
                                 mRecyclerView.setAdapter(mAdapter);
-                                if (more == true) {
-                                    pd.dismiss();
-                                    jsonRequestVolley(volleyUrl.split("min_id")[0] + "max_id=" + u.getItems().last().getId());
-                                }
 
-                            }
-                            else {
                                 pd.dismiss();
                                 Toast.makeText(MainActivity.this, "No Images Found", Toast.LENGTH_SHORT);
 
@@ -367,7 +350,7 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-    public boolean checkIfExists(String id){
+    public  boolean checkIfExists(String id){
 
         RealmQuery<User> query = realm.where(User.class)
                 .equalTo("id", id);
@@ -382,7 +365,7 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_delete) {
             realm.beginTransaction();
             realm.deleteAll();
             if (mAdapter != null) {
@@ -390,6 +373,10 @@ public class MainActivity extends AppCompatActivity {
             }
             realm.commitTransaction();
             return true;
+        }
+        if (id == R.id.action_settings){
+           Intent miIntent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(miIntent);
         }
 
         return super.onOptionsItemSelected(item);

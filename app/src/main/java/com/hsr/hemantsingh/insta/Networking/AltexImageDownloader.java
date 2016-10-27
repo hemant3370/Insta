@@ -1,4 +1,4 @@
-package com.hsr.hemantsingh.insta;
+package com.hsr.hemantsingh.insta.Networking;
 
 /**
  * Created by HemantSingh on 24/10/16.
@@ -214,8 +214,11 @@ public class AltexImageDownloader {
         request.setDescription(imageUrl);
         request.allowScanningByMediaScanner();
         request.setDestinationUri(getDownloadDestination(downloadSubpath));
+        File f = new File(getDownloadDestination(downloadSubpath).toString());
+        if (!f.exists()){
+            downloadManager.enqueue(request);
+        }
 
-        downloadManager.enqueue(request);
 
     }
 

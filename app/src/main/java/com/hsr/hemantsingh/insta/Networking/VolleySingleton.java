@@ -1,14 +1,12 @@
-package com.hsr.hemantsingh.insta;
+package com.hsr.hemantsingh.insta.Networking;
 
 import android.graphics.Bitmap;
 import android.util.LruCache;
 
 import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
-
-import java.io.File;
+import com.hsr.hemantsingh.insta.MyApplication;
 
 public class VolleySingleton {
     private static VolleySingleton sInstance = null;

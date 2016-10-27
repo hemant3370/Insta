@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
 
     android:fitsSystemWindows="true"
-    tools:context="com.hsr.hemantsingh.insta.ImageTabsActivity">
+    tools:context="com.hsr.hemantsingh.insta.Activities.ImageTabsActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"

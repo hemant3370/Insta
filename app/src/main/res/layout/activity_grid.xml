@@ -8,7 +8,7 @@
     android:paddingLeft="0dp"
     android:paddingRight="0dp"
     android:paddingTop="0dp"
-    tools:context="com.hsr.hemantsingh.insta.GridActivity">
+    tools:context="com.hsr.hemantsingh.insta.Activities.GridActivity">
     <android.support.v7.widget.RecyclerView
         android:id="@+id/grid_recycler_view"
         android:layout_width="match_parent"

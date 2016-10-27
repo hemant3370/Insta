@@ -1,4 +1,4 @@
-package com.hsr.hemantsingh.insta;
+package com.hsr.hemantsingh.insta.Models;
 
 /**
  * Created by HemantSingh on 21/10/16.
