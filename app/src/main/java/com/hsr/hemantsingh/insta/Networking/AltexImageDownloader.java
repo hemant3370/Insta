@@ -198,8 +198,9 @@ public class AltexImageDownloader {
      * @param downloadSubfolder name you want to give to the subfolder in wich you save the
      *                          image.
      */
-    public static void writeToDisk(Context context, @NonNull String imageUrl, @NonNull String downloadSubfolder) {
+    public static long writeToDisk(Context context, @NonNull String imageUrl, @NonNull String downloadSubfolder) {
         Uri imageUri = Uri.parse(imageUrl);
+        long downloadReference;
         String fileName = imageUri.getLastPathSegment();
         String downloadSubpath = downloadSubfolder + fileName;
 
@@ -216,9 +217,12 @@ public class AltexImageDownloader {
         request.setDestinationUri(getDownloadDestination(downloadSubpath));
         File f = new File(getDownloadDestination(downloadSubpath).toString());
         if (!f.exists()){
-            downloadManager.enqueue(request);
+            downloadReference =  downloadManager.enqueue(request);
         }
-
+        else {
+            downloadReference = 0;
+        }
+         return  downloadReference;
 
     }
 

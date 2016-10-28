@@ -45,7 +45,7 @@ public class ImageTabsActivity extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
-    private String userId;
+    private String[] captions;
     TextView imageTitleTV;
 
     @Override
@@ -55,19 +55,16 @@ public class ImageTabsActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        userId = getIntent().getStringExtra("id");
-        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder().name(Realm.DEFAULT_REALM_NAME)
-                .schemaVersion(0)
-                .deleteRealmIfMigrationNeeded()
-                .build();
-        final Realm realm = Realm.getInstance(realmConfiguration);
+        captions = getIntent().getStringArrayExtra("captions");
+
         imageTitleTV = (TextView) findViewById(R.id.textView);
 
 
-        setTitle(realm.where(User.class).equalTo("id", userId).findAll().first().getItems().first().getUser().getFull_name());
+        setTitle(getIntent().getStringExtra("displayName"));
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), realm.where(User.class).equalTo("id", userId).findAll().first().getItems());
+
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(),getIntent().getStringExtra("username"),getIntent().getStringArrayExtra("files"));
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
@@ -84,9 +81,8 @@ public class ImageTabsActivity extends AppCompatActivity {
               @Override
               public void onPageSelected(int position) {
 
-                  imageTitleTV.setText(realm.where(User.class).equalTo("id", userId).findAll().first().getItems().get(position).getCaption() != null ? realm.where(User.class).equalTo("id", userId).findAll().first().getItems().get(position).getCaption().getText() : "");
+                  imageTitleTV.setText(captions[position]);
               }
-
               @Override
               public void onPageScrollStateChanged(int state) {
 
@@ -107,7 +103,7 @@ public class ImageTabsActivity extends AppCompatActivity {
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
         private static final String ARG_SECTION_URL = "section_url";
-        private static  final  String ARG_SECTION_TITLE = "section_title";
+
         VideoView vv;
         PlayPauseView fab;
 
@@ -119,12 +115,12 @@ public class ImageTabsActivity extends AppCompatActivity {
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static PlaceholderFragment newInstance(int sectionNumber, String url, String title) {
+        public static PlaceholderFragment newInstance(int sectionNumber, String url) {
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             args.putString(ARG_SECTION_URL, url);
-            args.putString(ARG_SECTION_TITLE, title);
+
             fragment.setArguments(args);
 
             return fragment;
@@ -207,7 +203,9 @@ public class ImageTabsActivity extends AppCompatActivity {
         @Override
         public void onDetach() {
             super.onDetach();
-            vv.stopPlayback();
+            if (vv != null) {
+                vv.stopPlayback();
+            }
         }
     }
 
@@ -217,15 +215,14 @@ public class ImageTabsActivity extends AppCompatActivity {
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-        public RealmList<ImageData> img;
+        public String  userName ;
         public String[] imgNameList;
 
-        public SectionsPagerAdapter(FragmentManager fm, RealmList<ImageData> data) {
+        public SectionsPagerAdapter(FragmentManager fm,String username, String[] data) {
             super(fm);
-            this.img = data;
-            File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                    + "/" + img.first().getUser().getUsername() +"/");
-            imgNameList =  folder.list();
+
+            userName = username;
+            imgNameList =  data;
 
 
         }
@@ -237,7 +234,7 @@ public class ImageTabsActivity extends AppCompatActivity {
 
 
             return PlaceholderFragment.newInstance(position ,Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                    + "/" + img.first().getUser().getUsername() +"/" + imgNameList[position], (   position < img.size() && img.get(position).getCaption() != null)? img.get(position).getCaption().getText().toString() : "");
+                    + "/" + userName +"/" + imgNameList[position]);
         }
 
         @Override

@@ -22,15 +22,15 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.hsr.hemantsingh.insta.Networking.AltexImageDownloader;
 import com.hsr.hemantsingh.insta.Adapters.GridAdapter;
 import com.hsr.hemantsingh.insta.Models.ImageData;
 import com.hsr.hemantsingh.insta.Models.User;
 import com.hsr.hemantsingh.insta.MyApplication;
-import com.hsr.hemantsingh.insta.R;
+import com.hsr.hemantsingh.insta.Networking.AltexImageDownloader;
 import com.hsr.hemantsingh.insta.Networking.VolleySingleton;
-import com.hsr.hemantsingh.insta.listeners.EndlessRecyclerViewScrollListener;
+import com.hsr.hemantsingh.insta.R;
 import com.hsr.hemantsingh.insta.listeners.CustomItemClickListener;
+import com.hsr.hemantsingh.insta.listeners.EndlessRecyclerViewScrollListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -67,24 +67,6 @@ public class GridActivity extends AppCompatActivity {
 
         final Activity activity = this;
 
-        listener = new CustomItemClickListener() {
-            @Override
-            public void onItemClick(View v, int position) {
-                Intent o = new Intent(GridActivity.this, ImageTabsActivity.class);
-
-                o.putExtra("id", results.first().getUser().getId());
-                o.putExtra("index", position);
-//                Bundle bundle = null;
-//
-//                if (activity != null) {
-//                    ActivityOptionsCompat options =
-//                            ActivityOptionsCompat.makeSceneTransitionAnimation(activity, v.findViewById(R.id.ivProfile), "change_image_transform");
-//                    bundle = options.toBundle();
-//                }
-//                activity.startActivity(o, bundle);
-                startActivity(o);
-            }
-        };
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -107,8 +89,29 @@ public class GridActivity extends AppCompatActivity {
 
 
         setTitle(results.first().getUser().getFull_name());
-        File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                + "/" + results.first().getUser().getUsername() +"/");
+       final File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
+        + "/" + results.first().getUser().getUsername() +"/");
+        final String[] files = folder.list();
+        listener = new CustomItemClickListener() {
+            @Override
+            public void onItemClick(View v, int position) {
+                Intent o = new Intent(GridActivity.this, ImageTabsActivity.class);
+
+                o.putExtra("files",files);
+                String[] captions = new String[results.size()];
+                for (ImageData img :
+                        results) {
+                    captions[results.indexOf(img)] = (img.getCaption() != null) ? img.getCaption().getText() : "";
+                }
+                o.putExtra("captions",captions);
+                o.putExtra("displayName",results.first().getUser().getFull_name());
+                o.putExtra("username",results.first().getUser().getUsername());
+                o.putExtra("id", results.first().getUser().getId());
+                o.putExtra("index", position);
+
+                startActivity(o);
+            }
+        };
         mAdapter = new GridAdapter(this,results.first().getUser().getUsername(),folder.list(),listener);
         mRecyclerView.setAdapter(mAdapter);
 
@@ -166,16 +169,22 @@ public class GridActivity extends AppCompatActivity {
                                 for (ImageData img:
                                         u.getItems() ) {
                                     if (!checkIfExists(img.getId())) {
-                                        realm.beginTransaction();
-                                        realm.where(User.class).equalTo("id", userId).findAll().first().addItem(img);
 
-                                        realm.commitTransaction();
-                                        if (img.getType().contains("video") && downloadVideo){
+                                        if (img.getType().contains("video")){
+                                            if( downloadVideo){
 
+                                                realm.beginTransaction();
+                                                realm.where(User.class).equalTo("id", userId).findAll().first().addItem(img);
 
-                                            AltexImageDownloader.writeToDisk(MyApplication.getAppContext(), img.getAlt_media_url(), volleyUrl.split("/")[3].trim() + "/");
+                                                realm.commitTransaction();
+                                                AltexImageDownloader.writeToDisk(MyApplication.getAppContext(), img.getAlt_media_url(), volleyUrl.split("/")[3].trim() + "/");
+                                            }
 
                                         } else {
+                                            realm.beginTransaction();
+                                            realm.where(User.class).equalTo("id", userId).findAll().first().addItem(img);
+
+                                            realm.commitTransaction();
                                             if (hdBool) {
                                                 AltexImageDownloader.writeToDisk(MyApplication.getAppContext(), img.getImages().getStandard_resolution().getUrl().replace("s640x640", "s1080x1080"), volleyUrl.split("/")[3].trim() + "/");
                                             }
@@ -189,9 +198,9 @@ public class GridActivity extends AppCompatActivity {
                                 results = realm.where(User.class).equalTo("id", userId).findAll().first().getItems();
 
 //                                    mAdapter.notifyItemRangeChanged();
-
-                                mAdapter.notifyDataSetChanged();
-//                                mAdapter.notifyItemRangeInserted(results.size() - u.getItems().size(),results.size());
+//
+//                                mAdapter.notifyDataSetChanged();
+////                                mAdapter.notifyItemRangeInserted(results.size() - u.getItems().size(),results.size());
 
                             }
                         } catch (JSONException e) {

@@ -51,6 +51,7 @@ import java.io.File;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmList;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
@@ -271,26 +272,29 @@ public class MainActivity extends AppCompatActivity {
                            count = array.length();
                             if (count > 0 ) {
                                 Gson gson = new GsonBuilder().create();
-                                    String json = response.toString();
-                                    final User u = gson.fromJson(json, User.class);
+                                String json = response.toString();
+                                final User u = gson.fromJson(json, User.class);
                                 realm.beginTransaction();
                                 u.setId(u.getItems().first().getUser().getId());
                                 realm.commitTransaction();
 
+
 //                                AltexImageDownloader.writeToDisk(MainActivity.this, u.getItems().first().getUser().getProfilePicture().replace("s150x150","s1080x1080"), volleyUrl.split("/")[3].trim() + "/");
                                 if (checkIfExists(u.getItems().first().getUser().getId()) == false) {
-                                    realm.beginTransaction();
-                                    realm.copyToRealm(u);
-                                    realm.commitTransaction();
+                                    RealmList<ImageData> list = new RealmList<>();
+                                    list.addAll(u.getItems());
+//
                                     for (ImageData img:
-                                            u.getItems() ) {
+                                            list ) {
 
 
-                                        if (img.getType().contains("video") && downloadVideo){
+                                        if (img.getType().contains("video") ){
+                                            if( downloadVideo){
 
 
-                                            AltexImageDownloader.writeToDisk(MyApplication.getAppContext(), img.getAlt_media_url(), volleyUrl.split("/")[3].trim() + "/");
-
+                                                AltexImageDownloader.writeToDisk(MyApplication.getAppContext(), img.getAlt_media_url(), volleyUrl.split("/")[3].trim() + "/");
+                                            }
+                                            else u.getItems().remove(img);
                                         }
                                         else {
 
@@ -304,6 +308,9 @@ public class MainActivity extends AppCompatActivity {
                                             }
                                         }
                                     }
+                                    realm.beginTransaction();
+                                    realm.copyToRealm(u);
+                                    realm.commitTransaction();
                                 }
 
                                 results = realm.where(User.class).findAll();
@@ -366,12 +373,20 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_delete) {
+            for (User u :
+                    realm.where(User.class).distinct("id")) {
+                File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
+                        + "/" + u.getItems().first().getUser().getUsername() +"/");
+                folder.delete();
+            }
+
             realm.beginTransaction();
             realm.deleteAll();
             if (mAdapter != null) {
                 mAdapter.notifyDataSetChanged();
             }
             realm.commitTransaction();
+
             return true;
         }
         if (id == R.id.action_settings){
