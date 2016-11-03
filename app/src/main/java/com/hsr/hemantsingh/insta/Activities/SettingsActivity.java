@@ -12,6 +12,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 
 import com.hsr.hemantsingh.insta.R;
@@ -92,7 +93,18 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         if (actionBar != null) {
             // Show the Up button in the action bar.
             actionBar.setDisplayHomeAsUpEnabled(true);
+
         }
+
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK))
+        {
+            finish();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     /**

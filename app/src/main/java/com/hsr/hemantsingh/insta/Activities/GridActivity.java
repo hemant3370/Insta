@@ -41,7 +41,6 @@ import java.util.Random;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
-import io.realm.RealmList;
 import io.realm.RealmQuery;
 
 public class GridActivity extends AppCompatActivity {

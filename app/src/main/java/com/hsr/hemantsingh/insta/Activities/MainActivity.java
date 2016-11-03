@@ -365,6 +365,13 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+    void deleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory())
+            for (File child : fileOrDirectory.listFiles())
+                deleteRecursive(child);
+
+        fileOrDirectory.delete();
+    }
     public  boolean checkIfExists(String id){
 
         RealmQuery<User> query = realm.where(User.class)
@@ -382,10 +389,10 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_delete) {
             for (User u :
-                    realm.where(User.class).distinct("id")) {
+                    realm.where(User.class).findAll()) {
                 File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
                         + "/" + u.getItems().first().getUser().getUsername() +"/");
-                folder.delete();
+                deleteRecursive(folder);
             }
 
             realm.beginTransaction();
