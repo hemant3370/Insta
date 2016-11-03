@@ -15,8 +15,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.VideoView;
 
-import com.hsr.hemantsingh.insta.Models.ImageData;
-import com.hsr.hemantsingh.insta.Models.User;
 import com.hsr.hemantsingh.insta.MyApplication;
 import com.hsr.hemantsingh.insta.R;
 import com.hsr.hemantsingh.insta.playpause.PlayPauseView;
@@ -24,9 +22,6 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 
-import io.realm.Realm;
-import io.realm.RealmConfiguration;
-import io.realm.RealmList;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class ImageTabsActivity extends AppCompatActivity {
@@ -45,8 +40,8 @@ public class ImageTabsActivity extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
-    private String[] captions;
-    TextView imageTitleTV;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,9 +50,9 @@ public class ImageTabsActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        captions = getIntent().getStringArrayExtra("captions");
 
-        imageTitleTV = (TextView) findViewById(R.id.textView);
+
+
 
 
         setTitle(getIntent().getStringExtra("displayName"));
@@ -72,22 +67,7 @@ public class ImageTabsActivity extends AppCompatActivity {
         mViewPager.setCurrentItem(getIntent().getIntExtra("index", 0));
 //        mViewPager.setOffscreenPageLimit(3);
 //        mViewPager.setPageTransformer(true, new CubeOutTransformer());
-          mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-              @Override
-              public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-              }
-
-              @Override
-              public void onPageSelected(int position) {
-
-                  imageTitleTV.setText(captions[position]);
-              }
-              @Override
-              public void onPageScrollStateChanged(int state) {
-
-              }
-          });
 
     }
 

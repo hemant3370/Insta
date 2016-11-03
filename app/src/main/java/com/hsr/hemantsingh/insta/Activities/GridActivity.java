@@ -51,7 +51,7 @@ public class GridActivity extends AppCompatActivity {
     public CustomItemClickListener listener;
     private Realm realm;
     String userId;
-    RealmList<ImageData> results;
+//
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,38 +85,34 @@ public class GridActivity extends AppCompatActivity {
 
         mRecyclerView.setLayoutManager(mLayoutManager);
          userId = getIntent().getStringExtra("id");
-        results = realm.where(User.class).equalTo("id", userId).findAll().first().getItems();
+//        results = realm.where(User.class).equalTo("id", userId).findAll().first().getItems();
 
 
-        setTitle(results.first().getUser().getFull_name());
-       final File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-        + "/" + results.first().getUser().getUsername() +"/");
-        final String[] files = folder.list();
+        setTitle(getIntent().getStringExtra("username"));
+//       final File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
+//        + "/" + results.first().getUser().getUsername() +"/");
+        final String[] files = getIntent().getStringArrayExtra("files");
+       final String[] captions = getIntent().getStringArrayExtra("captions");
         listener = new CustomItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
                 Intent o = new Intent(GridActivity.this, ImageTabsActivity.class);
 
                 o.putExtra("files",files);
-                String[] captions = new String[results.size()];
-                for (ImageData img :
-                        results) {
-                    captions[results.indexOf(img)] = (img.getCaption() != null) ? img.getCaption().getText() : "";
-                }
-                o.putExtra("captions",captions);
-                o.putExtra("displayName",results.first().getUser().getFull_name());
-                o.putExtra("username",results.first().getUser().getUsername());
-                o.putExtra("id", results.first().getUser().getId());
+
+                o.putExtra("displayName",getIntent().getStringExtra("displayName"));
+                o.putExtra("username",getIntent().getStringExtra("username"));
+                o.putExtra("id", getIntent().getStringExtra("id"));
                 o.putExtra("index", position);
 
                 startActivity(o);
             }
         };
-        mAdapter = new GridAdapter(this,results.first().getUser().getUsername(),folder.list(),listener);
+        mAdapter = new GridAdapter(this,getIntent().getStringExtra("username"),files,listener);
         mRecyclerView.setAdapter(mAdapter);
 
          AltexImageDownloader.readFromDiskAsync(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                 + "/" + results.first().getUser().getUsername() +"/" + folder.list()[new  Random().nextInt(folder.list().length - 1)]), new AltexImageDownloader.OnImageReadListener() {
+                 + "/" + getIntent().getStringExtra("username") +"/" + files[new  Random().nextInt(files.length - 1)]), new AltexImageDownloader.OnImageReadListener() {
              @Override
              public void onImageRead(Bitmap bitmap) {
                  Drawable d = new BitmapDrawable(getResources(), bitmap);
@@ -133,12 +129,12 @@ public class GridActivity extends AppCompatActivity {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
 
-                jsonRequestVolley("https://www.instagram.com/" + results.last().getUser().getUsername() + "/media/?&max_id=" +results.last().getId() );
+                jsonRequestVolley("https://www.instagram.com/" + getIntent().getStringExtra("username") + "/media/?&max_id=" + getIntent().getStringExtra("lastId"));
 
             }
         };
         mRecyclerView.addOnScrollListener(scrollListener);
-        jsonRequestVolley("https://www.instagram.com/" + results.last().getUser().getUsername() + "/media/" );
+        jsonRequestVolley("https://www.instagram.com/" + getIntent().getStringExtra("username") + "/media/" );
 //        mRecyclerView.setBackground(new GradientDrawable(activity.getResources().getConfiguration().orientation,));
     }
     public void jsonRequestVolley(final String volleyUrl) {
@@ -195,7 +191,7 @@ public class GridActivity extends AppCompatActivity {
                                     }
 
                                 }
-                                results = realm.where(User.class).equalTo("id", userId).findAll().first().getItems();
+
 
 //                                    mAdapter.notifyItemRangeChanged();
 //

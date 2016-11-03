@@ -90,12 +90,18 @@ public class MainActivity extends AppCompatActivity {
             // Uhhh I guess we have to ask for permission
             ActivityCompat.requestPermissions(activity,new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE },1);
         }
+
         listener = new CustomItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
                 Intent o = new Intent(MainActivity.this, GridActivity.class);
                 File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
                         + "/" + results.get(position).getItems().first().getUser().getUsername() +"/");
+
+                o.putExtra("displayName",results.get(position).getItems().first().getUser().getFull_name());
+                o.putExtra("lastId", results.get(position).getItems().last().getId());
+                o.putExtra("username",results.get(position).getItems().first().getUser().getUsername());
+                o.putExtra("id", results.get(position).getItems().first().getUser().getId());
                 for (String str :
                         folder.list()) {
                     File f = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
@@ -117,6 +123,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 }
+                final String[] files = folder.list();
+                o.putExtra("files",files);
                 o.putExtra("id", results.get(position).getItems().first().getUser().getId());
 //                Bundle bundle = null;
 
