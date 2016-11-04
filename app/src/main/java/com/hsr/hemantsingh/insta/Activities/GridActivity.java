@@ -1,6 +1,7 @@
 package com.hsr.hemantsingh.insta.Activities;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -104,7 +105,9 @@ public class GridActivity extends AppCompatActivity {
                 o.putExtra("id", getIntent().getStringExtra("id"));
                 o.putExtra("index", position);
 
-                startActivity(o);
+                ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(GridActivity.this, v, "slide_and_changebounds_sequential_with_interpolators");
+                startActivity(o, transitionActivityOptions.toBundle());
+//                startActivity(o);
             }
         };
         mAdapter = new GridAdapter(this,getIntent().getStringExtra("username"),files,listener);
