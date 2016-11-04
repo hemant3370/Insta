@@ -17,12 +17,13 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
     <ImageView
-        android:background="@color/cardview_light_background"
-        android:scaleType="fitXY"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:adjustViewBounds="true"
+        android:scaleType="center"
         android:id="@+id/ivProfile"
-        android:transitionName="profile" />
+         />
     <com.hsr.hemantsingh.insta.playpause.PlayPauseView
         android:id="@+id/fab"
         android:layout_width="wrap_content"
@@ -34,8 +35,5 @@
         android:layout_gravity="bottom|end"
         android:foreground="?android:selectableItemBackground"
         android:stateListAnimator="@animator/button_elevation"/>
-
-
-
 
 </RelativeLayout>

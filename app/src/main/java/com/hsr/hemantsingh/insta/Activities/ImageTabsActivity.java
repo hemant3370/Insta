@@ -154,7 +154,7 @@ public class ImageTabsActivity extends AppCompatActivity {
                 mAttacher = new PhotoViewAttacher(imageView);
 //                imageView.setImageBitmap(AltexImageDownloader.readFromDisk(new File(this.getArguments().getString(ARG_SECTION_URL))));
 //                mAttacher.update();
-                 Picasso.with(getContext()).load(new File(this.getArguments().getString(ARG_SECTION_URL))).fit().into(imageView);
+                 Picasso.with(getContext()).load(new File(this.getArguments().getString(ARG_SECTION_URL))).into(imageView);
 //                AltexImageDownloader.readFromDiskAsync(new File(this.getArguments().getString(ARG_SECTION_URL)), new AltexImageDownloader.OnImageReadListener() {
 //                    @Override
 //                    public void onImageRead(Bitmap bitmap) {
