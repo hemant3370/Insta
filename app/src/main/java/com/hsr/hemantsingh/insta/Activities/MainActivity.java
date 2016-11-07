@@ -55,10 +55,10 @@ import io.realm.RealmList;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity  {
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private MyAdapter mAdapter;
     private GridLayoutManager mLayoutManager;
     public CustomItemClickListener listener;
     private Realm realm;
@@ -126,21 +126,31 @@ public class MainActivity extends AppCompatActivity {
                 final String[] files = folder.list();
                 o.putExtra("files",files);
                 o.putExtra("id", results.get(position).getItems().first().getUser().getId());
-//                Bundle bundle = null;
+                if (mAdapter.editMode) {
+                    mAdapter.editMode = false;
+                    mAdapter.notifyDataSetChanged();
+                }
 
-//                if (activity != null) {
-//                    ActivityOptionsCompat options =
-//                            ActivityOptionsCompat.makeSceneTransitionAnimation(activity, v.findViewById(R.id.imageButton2), "imagetoimage");
-//                    bundle = options.toBundle();
-//                }
-//                activity.startActivity(o, bundle);
                 startActivity(o);
+            }
+
+            @Override
+            public void onDeleteClick(int position) {
+                File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
+                        + "/" + results.get(position).getItems().first().getUser().getUsername() +"/");
+                deleteRecursive(folder);
+
+
+                realm.beginTransaction();
+                results.deleteFromRealm(position);
+                if (mAdapter != null) {
+                    mAdapter.notifyDataSetChanged();
+                }
+                realm.commitTransaction();
             }
         };
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        mRecyclerView.setHasFixedSize(true);
+
 
         // use a linear layout manager
         if(activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
@@ -210,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
         });
         results = realm.where(User.class).findAll();
         if (results.size() > 0) {
-            mAdapter = new MyAdapter(results,listener);
+            mAdapter = new MyAdapter(results,listener, false);
             mRecyclerView.setAdapter(mAdapter);
         }
         else{
@@ -328,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
                                 else{
                                     mLayoutManager = new GridLayoutManager(MainActivity.this,5);
                                 }
-                                mAdapter = new MyAdapter(results, listener);
+                                mAdapter = new MyAdapter(results, listener,false);
                                 mRecyclerView.setAdapter(mAdapter);
 
                                 pd.dismiss();
@@ -352,11 +362,30 @@ public class MainActivity extends AppCompatActivity {
         // Access the RequestQueue through your singleton class.
         VolleySingleton.getInstance().getRequestQueue().add(jsObjRequest);
     }
+    void deleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory())
+            for (File child : fileOrDirectory.listFiles())
+                deleteRecursive(child);
 
+        fileOrDirectory.delete();
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
         realm.close();
+    }
+
+
+
+    @Override
+    public void onBackPressed() {
+        if (mAdapter.editMode) {
+            mAdapter.editMode = false;
+            mAdapter.notifyDataSetChanged();
+        }
+        else {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -365,13 +394,7 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-    void deleteRecursive(File fileOrDirectory) {
-        if (fileOrDirectory.isDirectory())
-            for (File child : fileOrDirectory.listFiles())
-                deleteRecursive(child);
 
-        fileOrDirectory.delete();
-    }
     public  boolean checkIfExists(String id){
 
         RealmQuery<User> query = realm.where(User.class)
@@ -388,19 +411,23 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_delete) {
-            for (User u :
-                    realm.where(User.class).findAll()) {
-                File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                        + "/" + u.getItems().first().getUser().getUsername() +"/");
-                deleteRecursive(folder);
-            }
+            mAdapter.editMode = true;
+            mAdapter.notifyDataSetChanged();
 
-            realm.beginTransaction();
-            realm.deleteAll();
-            if (mAdapter != null) {
-                mAdapter.notifyDataSetChanged();
-            }
-            realm.commitTransaction();
+
+//            for (User u :
+//                    realm.where(User.class).findAll()) {
+//                File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
+//                        + "/" + u.getItems().first().getUser().getUsername() +"/");
+//                deleteRecursive(folder);
+//            }
+//
+//            realm.beginTransaction();
+//            realm.deleteAll();
+//            if (mAdapter != null) {
+//                mAdapter.notifyDataSetChanged();
+//            }
+//            realm.commitTransaction();
 
             return true;
         }

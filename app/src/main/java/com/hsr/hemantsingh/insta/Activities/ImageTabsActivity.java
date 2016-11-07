@@ -82,7 +82,7 @@ public class ImageTabsActivity extends AppCompatActivity {
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
         private static final String ARG_SECTION_URL = "section_url";
-
+         PhotoViewAttacher mAttacher;
         VideoView vv;
         PlayPauseView fab;
 
@@ -130,7 +130,7 @@ public class ImageTabsActivity extends AppCompatActivity {
             View rootView = inflater.inflate(R.layout.fragment_image_tabs, container, false);
 //            TextView titleTV = (TextView) rootView.findViewById(R.id.textView);
             vv = (VideoView) rootView.findViewById(R.id.videoView);
-            final PhotoViewAttacher mAttacher;
+
             final ImageView imageView = (ImageView) rootView.findViewById(R.id.ivProfile);
              fab = (PlayPauseView) rootView.findViewById(R.id.fab);
             fab.setOnClickListener(new View.OnClickListener() {
@@ -146,7 +146,7 @@ public class ImageTabsActivity extends AppCompatActivity {
                     }
                 }
             });
-            imageView.setMinimumHeight(MyApplication.getInstance().getMetrics().widthPixels);
+//            imageView.setMinimumHeight(MyApplication.getInstance().getMetrics().widthPixels);
             if (this.getArguments().getString(ARG_SECTION_URL).contains(".jpg")){
                 vv.setVisibility(View.GONE);
                 fab.setVisibility(View.GONE);
@@ -154,6 +154,7 @@ public class ImageTabsActivity extends AppCompatActivity {
 //                imageView.setImageBitmap(AltexImageDownloader.readFromDisk(new File(this.getArguments().getString(ARG_SECTION_URL))));
 //                mAttacher.update();
                  Picasso.with(getContext()).load(new File(this.getArguments().getString(ARG_SECTION_URL))).into(imageView);
+                mAttacher.update();
 //                AltexImageDownloader.readFromDiskAsync(new File(this.getArguments().getString(ARG_SECTION_URL)), new AltexImageDownloader.OnImageReadListener() {
 //                    @Override
 //                    public void onImageRead(Bitmap bitmap) {
@@ -180,11 +181,19 @@ public class ImageTabsActivity extends AppCompatActivity {
         }
 
         @Override
+        public void onDestroy() {
+            mAttacher.cleanup();
+            super.onDestroy();
+
+        }
+
+        @Override
         public void onDetach() {
             super.onDetach();
             if (vv != null) {
                 vv.stopPlayback();
             }
+
         }
     }
 

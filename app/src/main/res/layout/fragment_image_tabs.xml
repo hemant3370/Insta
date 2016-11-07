@@ -19,7 +19,7 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:transitionName="slide_and_changebounds_sequential_with_interpolators"
+
         android:scaleType="fitCenter"
         android:adjustViewBounds="true"
         android:layout_centerInParent="true"

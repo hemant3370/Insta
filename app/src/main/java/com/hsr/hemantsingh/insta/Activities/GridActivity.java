@@ -8,6 +8,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -32,6 +33,7 @@ import com.hsr.hemantsingh.insta.Networking.VolleySingleton;
 import com.hsr.hemantsingh.insta.R;
 import com.hsr.hemantsingh.insta.listeners.CustomItemClickListener;
 import com.hsr.hemantsingh.insta.listeners.EndlessRecyclerViewScrollListener;
+import com.hsr.hemantsingh.insta.transitions.DetailsTransition;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -84,6 +86,7 @@ public class GridActivity extends AppCompatActivity {
         }
 
         mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setHasFixedSize(true);
          userId = getIntent().getStringExtra("id");
 //        results = realm.where(User.class).equalTo("id", userId).findAll().first().getItems();
 
@@ -104,10 +107,21 @@ public class GridActivity extends AppCompatActivity {
                 o.putExtra("username",getIntent().getStringExtra("username"));
                 o.putExtra("id", getIntent().getStringExtra("id"));
                 o.putExtra("index", position);
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                    setSharedElementEnterTransition(new DetailsTransition());
+//                    kittenDetails.setEnterTransition(new Fade());
+//                    setExitTransition(new Fade());
+//                    kittenDetails.setSharedElementReturnTransition(new DetailsTransition());
+//                }
 
-                ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(GridActivity.this, v, "slide_and_changebounds_sequential_with_interpolators");
-                startActivity(o, transitionActivityOptions.toBundle());
-//                startActivity(o);
+//                ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(GridActivity.this, v.findViewById(R.id.ivProfile), getString(R.string.transition_name_circle));
+//                startActivity(o, transitionActivityOptions.toBundle());
+                startActivity(o);
+            }
+
+            @Override
+            public void onDeleteClick(int position) {
+
             }
         };
         mAdapter = new GridAdapter(this,getIntent().getStringExtra("username"),files,listener);

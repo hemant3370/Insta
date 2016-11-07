@@ -29,7 +29,7 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class ViewHolder extends RecyclerView.ViewHolder implements  CustomItemClickListener {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public View mItemView;
         public ImageView imgageView;
@@ -40,10 +40,7 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
             imgageView = (ImageView) v.findViewById(R.id.ivProfile);
         }
 
-        @Override
-        public void onItemClick(View v, int position) {
 
-        }
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
