@@ -233,6 +233,12 @@ public class GridActivity extends AppCompatActivity {
         VolleySingleton.getInstance().getRequestQueue().add(jsObjRequest);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mAdapter.notifyDataSetChanged();
+    }
+
     public  boolean checkIfExists(String id){
 
         RealmQuery<ImageData> query = realm.where(ImageData.class)

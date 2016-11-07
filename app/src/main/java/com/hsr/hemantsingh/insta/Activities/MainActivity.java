@@ -11,6 +11,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -34,13 +35,13 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.hsr.hemantsingh.insta.Networking.AltexImageDownloader;
+import com.hsr.hemantsingh.insta.Adapters.MyAdapter;
 import com.hsr.hemantsingh.insta.Models.ImageData;
 import com.hsr.hemantsingh.insta.Models.User;
-import com.hsr.hemantsingh.insta.Adapters.MyAdapter;
 import com.hsr.hemantsingh.insta.MyApplication;
-import com.hsr.hemantsingh.insta.R;
+import com.hsr.hemantsingh.insta.Networking.AltexImageDownloader;
 import com.hsr.hemantsingh.insta.Networking.VolleySingleton;
+import com.hsr.hemantsingh.insta.R;
 import com.hsr.hemantsingh.insta.listeners.CustomItemClickListener;
 
 import org.json.JSONArray;
@@ -48,12 +49,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmList;
 import io.realm.RealmQuery;
-import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity  {
 
@@ -63,10 +64,12 @@ public class MainActivity extends AppCompatActivity  {
     public CustomItemClickListener listener;
     private Realm realm;
     ProgressDialog pd;
+    FloatingActionButton editFab,addFab;
     AlertDialog name;
+
     AutoCompleteTextView txtUrl ;
     int count;
-    RealmResults<User> results;
+    List<User> results;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,6 +84,9 @@ public class MainActivity extends AppCompatActivity  {
                 .build();
          realm = Realm.getInstance(realmConfiguration);
         txtUrl = new AutoCompleteTextView(this);
+        editFab = (FloatingActionButton) findViewById(R.id.fabEdit);
+        addFab = (FloatingActionButton) findViewById(R.id.fab1);
+        editFab.setVisibility(View.GONE);
         final Activity activity = this;
         String permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
         if(ActivityCompat.checkSelfPermission(activity, permission)
@@ -90,6 +96,7 @@ public class MainActivity extends AppCompatActivity  {
             // Uhhh I guess we have to ask for permission
             ActivityCompat.requestPermissions(activity,new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE },1);
         }
+
 
         listener = new CustomItemClickListener() {
             @Override
@@ -142,7 +149,7 @@ public class MainActivity extends AppCompatActivity  {
 
 
                 realm.beginTransaction();
-                results.deleteFromRealm(position);
+                results.get(position).deleteFromRealm();
                 if (mAdapter != null) {
                     mAdapter.notifyDataSetChanged();
                 }
@@ -226,6 +233,7 @@ public class MainActivity extends AppCompatActivity  {
         else{
             name.show();
         }
+
     }
     public void showPD(){
     pd = new ProgressDialog(MainActivity.this);
@@ -271,6 +279,14 @@ public class MainActivity extends AppCompatActivity  {
     public void fabClick(View v){
         txtUrl.setText("");
         name.show();
+    }
+    public void cancelEditClick(View v){
+        if (mAdapter.editMode) {
+            mAdapter.editMode = false;
+            mAdapter.notifyDataSetChanged();
+        }
+       editFab.setVisibility(View.GONE);
+        addFab.setVisibility(View.VISIBLE);
     }
     public void jsonRequestVolley(final String volleyUrl) {
         //dialog.show();
@@ -382,6 +398,8 @@ public class MainActivity extends AppCompatActivity  {
         if (mAdapter.editMode) {
             mAdapter.editMode = false;
             mAdapter.notifyDataSetChanged();
+            editFab.setVisibility(View.GONE);
+            addFab.setVisibility(View.VISIBLE);
         }
         else {
             super.onBackPressed();
@@ -410,11 +428,11 @@ public class MainActivity extends AppCompatActivity  {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_delete) {
+        if (id == R.id.action_edit) {
             mAdapter.editMode = true;
             mAdapter.notifyDataSetChanged();
-
-
+            addFab.setVisibility(View.GONE);
+            editFab.setVisibility(View.VISIBLE);
 //            for (User u :
 //                    realm.where(User.class).findAll()) {
 //                File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
@@ -431,6 +449,7 @@ public class MainActivity extends AppCompatActivity  {
 
             return true;
         }
+
         if (id == R.id.action_settings){
            Intent miIntent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(miIntent);
@@ -438,5 +457,6 @@ public class MainActivity extends AppCompatActivity  {
 
         return super.onOptionsItemSelected(item);
     }
+
 
 }
