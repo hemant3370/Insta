@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity  {
                 realm.beginTransaction();
                 results.get(position).deleteFromRealm();
                 if (mAdapter != null) {
-                    mAdapter.notifyDataSetChanged();
+                    mAdapter.notifyItemRemoved(position);
                 }
                 realm.commitTransaction();
             }
@@ -395,7 +395,7 @@ public class MainActivity extends AppCompatActivity  {
 
     @Override
     public void onBackPressed() {
-        if (mAdapter.editMode) {
+        if (mAdapter != null && mAdapter.editMode) {
             mAdapter.editMode = false;
             mAdapter.notifyDataSetChanged();
             editFab.setVisibility(View.GONE);
