@@ -358,7 +358,7 @@ public class MainActivity extends AppCompatActivity  {
                                 mRecyclerView.setAdapter(mAdapter);
 
                                 pd.dismiss();
-                                Toast.makeText(MainActivity.this, "No Images Found", Toast.LENGTH_SHORT);
+                                Toast.makeText(MainActivity.this, "No Images Found", Toast.LENGTH_SHORT).show();
 
                             }
                         } catch (JSONException e) {
@@ -379,10 +379,13 @@ public class MainActivity extends AppCompatActivity  {
         VolleySingleton.getInstance().getRequestQueue().add(jsObjRequest);
     }
     void deleteRecursive(File fileOrDirectory) {
-        if (fileOrDirectory.isDirectory())
-            for (File child : fileOrDirectory.listFiles())
+        if (fileOrDirectory.isDirectory()) {
+            for (File child : fileOrDirectory.listFiles()) {
                 deleteRecursive(child);
 
+            }
+            fileOrDirectory.delete();
+        }
         fileOrDirectory.delete();
     }
     @Override
