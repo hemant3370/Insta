@@ -169,10 +169,10 @@ public class MainActivity extends AppCompatActivity  {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
 
-          final String[] COUNTRIES = new String[]{
+          final String[] instagramHandles = new String[]{
 
           };
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, COUNTRIES);
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, instagramHandles);
         txtUrl.setAdapter(adapter);
 
         txtUrl.addTextChangedListener(new TextWatcher() {
@@ -194,12 +194,12 @@ public class MainActivity extends AppCompatActivity  {
             }
         });
 // Set the default text to a link of the Queen
-        txtUrl.setHint("Type Instagram username");
+        txtUrl.setHint("Type here...");
 
         // specify an adapter (see also next example)
           name = new AlertDialog.Builder(this)
-                 .setTitle("Download Pics")
-                 .setMessage("Enter the Instagram username")
+                 .setTitle("Download Media")
+                 .setMessage("Type username or handle")
                  .setView(txtUrl)
                  .setPositiveButton("Start", new DialogInterface.OnClickListener() {
                      public void onClick(DialogInterface dialog, int whichButton) {
@@ -237,9 +237,8 @@ public class MainActivity extends AppCompatActivity  {
     }
     public void showPD(){
     pd = new ProgressDialog(MainActivity.this);
-        pd.setTitle("Fetching");
-
-        pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        pd.setTitle("Fetching media");
+        pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         pd.setIndeterminate(true);
         pd.show();
     }
@@ -357,9 +356,14 @@ public class MainActivity extends AppCompatActivity  {
                                 mAdapter = new MyAdapter(results, listener,false);
                                 mRecyclerView.setAdapter(mAdapter);
 
-                                pd.dismiss();
-                                Toast.makeText(MainActivity.this, "No Images Found", Toast.LENGTH_SHORT).show();
 
+                                pd.dismiss();
+                            }
+                            else {
+                                pd.dismiss();
+                                txtUrl.setText("");
+                                name.show();
+                                Toast.makeText(MainActivity.this, "No Images Found OR Account is Private.", Toast.LENGTH_LONG).show();
                             }
                         } catch (JSONException e) {
                             Log.e("TAG", e.toString());
