@@ -84,7 +84,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder>  {
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         holder.nameTV.setText(mDataset.get(position).getItems().first().getUser().getFull_name());
@@ -95,7 +95,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder>  {
             @Override
             public void onClick(View view) {
 
-                listener.onDeleteClick(position);
+                listener.onDeleteClick(holder.mItemView, position);
 
             }
         });

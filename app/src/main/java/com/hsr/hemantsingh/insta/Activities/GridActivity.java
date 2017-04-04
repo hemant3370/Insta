@@ -49,7 +49,6 @@ import io.realm.RealmQuery;
 public class GridActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
-    private GridLayoutManager mLayoutManager;
     public CustomItemClickListener listener;
     private Realm realm;
     String userId;
@@ -72,9 +71,10 @@ public class GridActivity extends AppCompatActivity {
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
-//        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setHasFixedSize(true);
 
         // use a linear layout manager
+        GridLayoutManager mLayoutManager;
         if(activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
             mLayoutManager = new GridLayoutManager(this,3);
 //            mLayoutManager = new StaggeredGridLayoutManager(2,Configuration.ORIENTATION_PORTRAIT);
@@ -100,29 +100,19 @@ public class GridActivity extends AppCompatActivity {
             @Override
             public void onItemClick(View v, int position) {
                 Intent o = new Intent(GridActivity.this, ImageTabsActivity.class);
-
                 o.putExtra("files",files);
-
                 o.putExtra("displayName",getIntent().getStringExtra("displayName"));
                 o.putExtra("username",getIntent().getStringExtra("username"));
                 o.putExtra("id", getIntent().getStringExtra("id"));
                 o.putExtra("index", position);
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//                    setSharedElementEnterTransition(new DetailsTransition());
-//                    kittenDetails.setEnterTransition(new Fade());
-//                    setExitTransition(new Fade());
-//                    kittenDetails.setSharedElementReturnTransition(new DetailsTransition());
-//                }
-
-//                ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(GridActivity.this, v.findViewById(R.id.ivProfile), getString(R.string.transition_name_circle));
-//                startActivity(o, transitionActivityOptions.toBundle());
                 startActivity(o);
             }
 
             @Override
-            public void onDeleteClick(int position) {
+            public void onDeleteClick(View v, int position) {
 
             }
+
         };
         mAdapter = new GridAdapter(this,getIntent().getStringExtra("username"),files,listener);
         mRecyclerView.setAdapter(mAdapter);
@@ -207,13 +197,6 @@ public class GridActivity extends AppCompatActivity {
                                     }
 
                                 }
-
-
-//                                    mAdapter.notifyItemRangeChanged();
-//
-//                                mAdapter.notifyDataSetChanged();
-////                                mAdapter.notifyItemRangeInserted(results.size() - u.getItems().size(),results.size());
-
                             }
                         } catch (JSONException e) {
                             Log.e("TAG", e.toString());

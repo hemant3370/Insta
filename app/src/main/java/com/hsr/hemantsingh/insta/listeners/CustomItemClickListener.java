@@ -7,5 +7,5 @@ import android.view.View;
  */
 public interface CustomItemClickListener {
     void onItemClick(View v, int position);
-    void onDeleteClick(int position);
+    void onDeleteClick(View v,int position);
 }

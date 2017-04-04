@@ -55,6 +55,7 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmList;
 import io.realm.RealmQuery;
+import tyrantgit.explosionfield.ExplosionField;
 
 public class MainActivity extends AppCompatActivity  {
 
@@ -77,6 +78,7 @@ public class MainActivity extends AppCompatActivity  {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        mRecyclerView.setHasFixedSize(true);
         Realm.init(getApplicationContext());
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder().name(Realm.DEFAULT_REALM_NAME)
                 .schemaVersion(0)
@@ -142,12 +144,12 @@ public class MainActivity extends AppCompatActivity  {
             }
 
             @Override
-            public void onDeleteClick(int position) {
+            public void onDeleteClick(View v, int position) {
                 File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
                         + "/" + results.get(position).getItems().first().getUser().getUsername() +"/");
                 deleteRecursive(folder);
-
-
+                ExplosionField explosionField = new ExplosionField(MainActivity.this);
+                explosionField.explode(v);
                 realm.beginTransaction();
                 results.get(position).deleteFromRealm();
                 if (mAdapter != null) {
