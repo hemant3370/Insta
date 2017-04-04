@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity  {
     ProgressDialog pd;
     FloatingActionButton editFab,addFab;
     AlertDialog name;
-
+    ExplosionField explosionField;
     AutoCompleteTextView txtUrl ;
     int count;
     List<User> results;
@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity  {
             // Uhhh I guess we have to ask for permission
             ActivityCompat.requestPermissions(activity,new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE },1);
         }
-
+        explosionField = ExplosionField.attach2Window(this);
 
         listener = new CustomItemClickListener() {
             @Override
@@ -148,7 +148,6 @@ public class MainActivity extends AppCompatActivity  {
                 File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
                         + "/" + results.get(position).getItems().first().getUser().getUsername() +"/");
                 deleteRecursive(folder);
-                ExplosionField explosionField = new ExplosionField(MainActivity.this);
                 explosionField.explode(v);
                 realm.beginTransaction();
                 results.get(position).deleteFromRealm();
