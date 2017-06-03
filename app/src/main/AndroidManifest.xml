@@ -27,15 +27,17 @@
             android:name=".Activities.ImageTabsActivity"
             android:label="@string/title_activity_image_tabs"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".Activities.GridActivity" />
+        <activity android:name=".Activities.GridActivity"
+            android:parentActivityName=".Activities.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".Activities.MainActivity" />
+            </activity>
         <activity
             android:name=".Activities.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName="com.hsr.hemantsingh.insta.Activities.MainActivity" >>
+             >
 
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.hsr.hemantsingh.insta.Activities.MainActivity" />
         </activity>
     </application>
 

@@ -7,14 +7,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.VideoView;
 
-import com.hsr.hemantsingh.insta.MyApplication;
 import com.hsr.hemantsingh.insta.R;
 import com.hsr.hemantsingh.insta.playpause.PlayPauseView;
 import com.squareup.picasso.Picasso;
@@ -46,14 +44,6 @@ public class ImageTabsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_tabs);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-
-
-
-
         setTitle(getIntent().getStringExtra("displayName"));
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
