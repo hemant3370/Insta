@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -36,10 +35,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hsr.hemantsingh.insta.Adapters.MyAdapter;
-import com.hsr.hemantsingh.insta.Models.ImageData;
 import com.hsr.hemantsingh.insta.Models.User;
-import com.hsr.hemantsingh.insta.MyApplication;
-import com.hsr.hemantsingh.insta.Networking.AltexImageDownloader;
 import com.hsr.hemantsingh.insta.Networking.VolleySingleton;
 import com.hsr.hemantsingh.insta.R;
 import com.hsr.hemantsingh.insta.listeners.CustomItemClickListener;
@@ -104,37 +100,10 @@ public class MainActivity extends AppCompatActivity  {
             @Override
             public void onItemClick(View v, int position) {
                 Intent o = new Intent(MainActivity.this, GridActivity.class);
-                File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                        + "/" + results.get(position).getItems().first().getUser().getUsername() +"/");
-
-                o.putExtra("displayName",results.get(position).getItems().first().getUser().getFull_name());
-                o.putExtra("lastId", results.get(position).getItems().last().getId());
-                o.putExtra("username",results.get(position).getItems().first().getUser().getUsername());
-                o.putExtra("id", results.get(position).getItems().first().getUser().getId());
-                for (String str :
-                        folder.list()) {
-                    File f = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                            + "/" + results.get(position).getItems().first().getUser().getUsername() +"/" + str);
-                    if  (!f.isFile() || f.isDirectory()){
-                        f.delete();
-                        if(f.exists()){
-                            try {
-                                f.getCanonicalFile().delete();
-                            } catch (java.io.IOException e) {
-                                e.printStackTrace();
-                            }
-                            if(f.exists()){
-                                getApplicationContext().deleteFile(f.getName());
-                            }
-                            if(f.exists()){
-                                f.getAbsoluteFile().delete();
-                            }
-                        }
-                    }
-                }
-                final String[] files = folder.list();
-                o.putExtra("files",files);
-                o.putExtra("id", results.get(position).getItems().first().getUser().getId());
+                o.putExtra("displayName",results.get(position).getFullName());
+                o.putExtra("files", results.get(position).getUrls().toArray(new String[results.get(position).getUrls().size()]));
+                o.putExtra("username",results.get(position).getUsername());
+                o.putExtra("id", results.get(position).getId());
                 if (mAdapter.editMode) {
                     mAdapter.editMode = false;
                     mAdapter.notifyDataSetChanged();
@@ -145,9 +114,6 @@ public class MainActivity extends AppCompatActivity  {
 
             @Override
             public void onDeleteClick(View v, int position) {
-                File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                        + "/" + results.get(position).getItems().first().getUser().getUsername() +"/");
-                deleteRecursive(folder);
                 explosionField.explode(v);
                 realm.beginTransaction();
                 results.get(position).deleteFromRealm();
@@ -207,7 +173,7 @@ public class MainActivity extends AppCompatActivity  {
                          String url = txtUrl.getText().toString();
                          if (url.length() > 0) {
                              showPD();
-                             jsonRequestVolley("https://www.instagram.com/" + url + "/media/?&");
+                             jsonRequestVolley("https://www.instagram.com/" + url + "/?__a=1");
                          }
                      }
                  })
@@ -223,7 +189,7 @@ public class MainActivity extends AppCompatActivity  {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 name.dismiss();
                 showPD();
-                jsonRequestVolley("https://www.instagram.com/" + adapter.getItem(i).toString() + "/media/?&");
+                jsonRequestVolley("https://www.instagram.com/" + adapter.getItem(i) + "/?__a=1");
             }
         });
         results = realm.where(User.class).findAll();
@@ -298,7 +264,9 @@ public class MainActivity extends AppCompatActivity  {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            JSONArray array = response.getJSONArray("items");
+                            JSONObject user = response.getJSONObject("user");
+                            JSONObject media = user.getJSONObject("media");
+                            JSONArray array = media.getJSONArray("nodes");
 
                             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                             Boolean hdBool = sharedPref.getBoolean("fullhdkey", false);
@@ -306,42 +274,25 @@ public class MainActivity extends AppCompatActivity  {
                            count = array.length();
                             if (count > 0 ) {
                                 Gson gson = new GsonBuilder().create();
-                                String json = response.toString();
+                                String json = user.toString();
                                 final User u = gson.fromJson(json, User.class);
+                                RealmList<String> urls = new RealmList<>();
+                                for (int i=0; i < array.length(); i++) {
+                                    try {
+                                        String url = array.getJSONObject(i).getString("display_src");
+                                        urls.add(url);
+                                    } catch (JSONException e1) {
+                                        e1.printStackTrace();
+                                    }
+                                }
+                                u.setUrls(urls);
                                 realm.beginTransaction();
-                                u.setId(u.getItems().first().getUser().getId());
+                                u.setId(u.getId());
                                 realm.commitTransaction();
 
 
 //                                AltexImageDownloader.writeToDisk(MainActivity.this, u.getItems().first().getUser().getProfilePicture().replace("s150x150","s1080x1080"), volleyUrl.split("/")[3].trim() + "/");
-                                if (checkIfExists(u.getItems().first().getUser().getId()) == false) {
-                                    RealmList<ImageData> list = new RealmList<>();
-                                    list.addAll(u.getItems());
-//
-                                    for (ImageData img:
-                                            list ) {
-
-
-                                        if (img.getType().contains("video") ){
-                                            if( downloadVideo){
-
-
-                                                AltexImageDownloader.writeToDisk(MyApplication.getAppContext(), img.getAlt_media_url(), volleyUrl.split("/")[3].trim() + "/");
-                                            }
-                                            else u.getItems().remove(img);
-                                        }
-                                        else {
-
-
-                                            if (hdBool) {
-                                                AltexImageDownloader.writeToDisk(MyApplication.getAppContext(), img.getImages().getStandard_resolution().getUrl().replace("s640x640", "s1080x1080"), volleyUrl.split("/")[3].trim() + "/");
-                                            }
-                                            else{
-                                                AltexImageDownloader.writeToDisk(MyApplication.getAppContext(), img.getImages().getStandard_resolution().getUrl(), volleyUrl.split("/")[3].trim() + "/");
-
-                                            }
-                                        }
-                                    }
+                                if (!checkIfExists(u.getId())) {
                                     realm.beginTransaction();
                                     realm.copyToRealm(u);
                                     realm.commitTransaction();
@@ -417,7 +368,7 @@ public class MainActivity extends AppCompatActivity  {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+//        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 

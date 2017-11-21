@@ -1,8 +1,6 @@
 package com.hsr.hemantsingh.insta.Adapters;
 
-import android.os.Environment;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,11 +9,10 @@ import android.widget.TextView;
 
 import com.android.volley.toolbox.NetworkImageView;
 import com.hsr.hemantsingh.insta.Models.User;
-import com.hsr.hemantsingh.insta.R;
 import com.hsr.hemantsingh.insta.Networking.VolleySingleton;
+import com.hsr.hemantsingh.insta.R;
 import com.hsr.hemantsingh.insta.listeners.CustomItemClickListener;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -87,10 +84,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder>  {
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        holder.nameTV.setText(mDataset.get(position).getItems().first().getUser().getFull_name());
-        Log.wtf( "onBindViewHolder: ", mDataset.get(position).getItems().first().getUser().getProfilePicture().replace("s150x150","s640x640"));
-         holder.proPicIB.setImageUrl(mDataset.get(position).getItems().first().getUser().getProfilePicture().replace("s150x150","s640x640"), VolleySingleton.getInstance().getImageLoader());
-        holder.followerTV.setText(mDataset.get(position).getItems().first().getUser().getUsername());
+        holder.nameTV.setText(mDataset.get(position).getFullName());
+//        Log.wtf( "onBindViewHolder: ", mDataset.get(position).getItems().first().getUser().getProfilePicture().replace("s150x150","s640x640"));
+         holder.proPicIB.setImageUrl(mDataset.get(position).getProfilePicUrlHd(), VolleySingleton.getInstance().getImageLoader());
+        holder.followerTV.setText(mDataset.get(position).getUsername());
         holder.editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

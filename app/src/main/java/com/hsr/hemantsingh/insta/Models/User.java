@@ -1,91 +1,144 @@
 package com.hsr.hemantsingh.insta.Models;
 
-import org.json.*;
-import io.realm.*;
-import io.realm.annotations.*;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.RealmClass;
+
+//
+//	User.java
+//	Model file generated using JSONExport: https://github.com/Ahmed-Ali/JSONExport
 
 
-
-
-/**
- * Created by HemantSingh on 21/10/16.
- */
 @RealmClass
 public class User extends RealmObject {
-    private RealmList<ImageData> items;
-    private String status;
+	@SerializedName("biography")
+	@Expose
+	private String biography;
+	@SerializedName("country_block")
+	@Expose
+	private Boolean countryBlock;
+	@SerializedName("external_url")
+	@Expose
+	private String externalUrl;
+	@SerializedName("external_url_linkshimmed")
+	@Expose
+	private String externalUrlLinkshimmed;
 
-    public String getId() {
-        return id;
-    }
+	@SerializedName("full_name")
+	@Expose
+	private String fullName;
 
-    public void setId(String id) {
-        this.id = id;
-    }
+	@SerializedName("id")
+	@Expose
+	private String id;
+	@SerializedName("is_private")
+	@Expose
+	private Boolean isPrivate;
+	@SerializedName("is_verified")
+	@Expose
+	private Boolean isVerified;
+	@SerializedName("profile_pic_url")
+	@Expose
+	private String profilePicUrl;
+	@SerializedName("profile_pic_url_hd")
+	@Expose
+	private String profilePicUrlHd;
 
-    private String id ;
+	@SerializedName("username")
+	@Expose
+	private String username;
+	@SerializedName("connected_fb_page")
+	@Expose
+	private String connectedFbPage;
 
+	private RealmList<String> urls;
 
+	public void setBiography(String biography){
+		this.biography = biography;
+	}
+	public String getBiography(){
+		return this.biography;
+	}
 
-    public void setItems(RealmList<ImageData> items){
-        this.items = items;
-    }
-    public void addItem(ImageData item){
-        this.items.add(item);
-    }
-    public RealmList<ImageData> getItems(){
-        return this.items;
-    }
-    public void setStatus(String status){
-        this.status = status;
-    }
-    public String getStatus(){
-        return this.status;
-    }
+	public void setConnectedFbPage(String connectedFbPage){
+		this.connectedFbPage = connectedFbPage;
+	}
+	public String getConnectedFbPage(){
+		return this.connectedFbPage;
+	}
 
-    /**
-     * Creates instance using the passed realm and jsonObject to set the properties values
-     */
-    public static User fromJson(Realm realm, JSONObject jsonObject){
-        if(jsonObject == null){
-            return null;
-        }
-        User rootClass = realm.createObject(User.class);
-        JSONArray itemsJsonArray = jsonObject.optJSONArray("items");
-        if(itemsJsonArray != null){
-            for (int i = 0; i < itemsJsonArray.length(); i++) {
-                JSONObject itemsObject = itemsJsonArray.optJSONObject(i);
-                ImageData itemsValue = ImageData.fromJson(realm, itemsObject);
-                if(itemsValue != null){
-                    rootClass.getItems().add(itemsValue);
-                }
-            }
-        }
-        rootClass.status = (String) jsonObject.opt("status");
-        return rootClass;
-    }
+	public void setExternalUrl(String externalUrl){
+		this.externalUrl = externalUrl;
+	}
+	public String getExternalUrl(){
+		return this.externalUrl;
+	}
+	public void setExternalUrlLinkshimmed(String externalUrlLinkshimmed){
+		this.externalUrlLinkshimmed = externalUrlLinkshimmed;
+	}
+	public String getExternalUrlLinkshimmed(){
+		return this.externalUrlLinkshimmed;
+	}
 
-    /**
-     * Returns all the available property values in the form of JSONObject instance where the key is the approperiate json key and the value is the value of the corresponding field
-     */
-    public static JSONObject toJsonObject(User rootClass)
-    {
-        JSONObject jsonObject = new JSONObject();
-        try {
-            if(rootClass.items != null && rootClass.items.size() > 0){
-                JSONArray itemsJsonArray = new JSONArray();
-                for(ImageData itemsElement : rootClass.items){
-                    itemsJsonArray.put(ImageData.toJsonObject(itemsElement));
-                }
-                jsonObject.put("items", itemsJsonArray);
-            }
-            jsonObject.put("status", rootClass.status);
-        } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return jsonObject;
-    }
+	public void setFullName(String fullName){
+		this.fullName = fullName;
+	}
+	public String getFullName(){
+		return this.fullName;
+	}
+
+	public void setId(String id){
+		this.id = id;
+	}
+	public String getId(){
+		return this.id;
+	}
+	public void setIsPrivate(boolean isPrivate){
+		this.isPrivate = isPrivate;
+	}
+	public boolean isIsPrivate()
+	{
+		return this.isPrivate;
+	}
+	public void setIsVerified(boolean isVerified){
+		this.isVerified = isVerified;
+	}
+	public boolean isIsVerified()
+	{
+		return this.isVerified;
+	}
+
+	public void setProfilePicUrl(String profilePicUrl){
+		this.profilePicUrl = profilePicUrl;
+	}
+	public String getProfilePicUrl(){
+		return this.profilePicUrl;
+	}
+	public void setProfilePicUrlHd(String profilePicUrlHd){
+		this.profilePicUrlHd = profilePicUrlHd;
+	}
+	public String getProfilePicUrlHd(){
+		return this.profilePicUrlHd;
+	}
+
+	public void setUsername(String username){
+		this.username = username;
+	}
+	public String getUsername(){
+		return this.username;
+	}
+
+	public RealmList<String> getUrls() {
+		return urls;
+	}
+
+	public void setUrls(RealmList<String> urls) {
+		this.urls = urls;
+	}
+
 
 
 }

@@ -1,50 +1,20 @@
 package com.hsr.hemantsingh.insta.Activities;
 
 import android.app.Activity;
-import android.app.ActivityOptions;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.hsr.hemantsingh.insta.Adapters.GridAdapter;
-import com.hsr.hemantsingh.insta.Models.ImageData;
-import com.hsr.hemantsingh.insta.Models.User;
-import com.hsr.hemantsingh.insta.MyApplication;
-import com.hsr.hemantsingh.insta.Networking.AltexImageDownloader;
-import com.hsr.hemantsingh.insta.Networking.VolleySingleton;
 import com.hsr.hemantsingh.insta.R;
 import com.hsr.hemantsingh.insta.listeners.CustomItemClickListener;
-import com.hsr.hemantsingh.insta.listeners.EndlessRecyclerViewScrollListener;
-import com.hsr.hemantsingh.insta.transitions.DetailsTransition;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.File;
-import java.util.Random;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
-import io.realm.RealmQuery;
 
 public class GridActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
@@ -116,117 +86,11 @@ public class GridActivity extends AppCompatActivity {
         };
         mAdapter = new GridAdapter(this,getIntent().getStringExtra("username"),files,listener);
         mRecyclerView.setAdapter(mAdapter);
-
-         AltexImageDownloader.readFromDiskAsync(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                 + "/" + getIntent().getStringExtra("username") +"/" + files[new  Random().nextInt(files.length - 1)]), new AltexImageDownloader.OnImageReadListener() {
-             @Override
-             public void onImageRead(Bitmap bitmap) {
-                 Drawable d = new BitmapDrawable(getResources(), bitmap);
-                 d.setAlpha(130);
-                 mRecyclerView.setBackground(d);
-             }
-
-             @Override
-             public void onReadFailed() {
-
-             }
-         });
-        EndlessRecyclerViewScrollListener scrollListener = new EndlessRecyclerViewScrollListener(mLayoutManager) {
-            @Override
-            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-
-                jsonRequestVolley("https://www.instagram.com/" + getIntent().getStringExtra("username") + "/media/?&max_id=" + getIntent().getStringExtra("lastId"));
-
-            }
-        };
-        mRecyclerView.addOnScrollListener(scrollListener);
-        jsonRequestVolley("https://www.instagram.com/" + getIntent().getStringExtra("username") + "/media/" );
-//        mRecyclerView.setBackground(new GradientDrawable(activity.getResources().getConfiguration().orientation,));
-    }
-    public void jsonRequestVolley(final String volleyUrl) {
-        //dialog.show();
-
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest
-
-                (Request.Method.GET, volleyUrl, null, new Response.Listener<JSONObject>() {
-
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            JSONArray array = response.getJSONArray("items");
-                           SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(GridActivity.this);
-                            Boolean hdBool = sharedPref.getBoolean("fullhdkey", true);
-                            Boolean downloadVideo = sharedPref.getBoolean("videokey", false);
-
-                           int count = array.length();
-                            if (count > 0 ) {
-                                Gson gson = new GsonBuilder().create();
-                                String json = response.toString();
-                                final User u = gson.fromJson(json, User.class);
-                                realm.beginTransaction();
-                                u.setId(u.getItems().first().getUser().getId());
-                                realm.commitTransaction();
-
-//                                AltexImageDownloader.writeToDisk(MainActivity.this, u.getItems().first().getUser().getProfilePicture().replace("s150x150","s1080x1080"), volleyUrl.split("/")[3].trim() + "/");
-                                for (ImageData img:
-                                        u.getItems() ) {
-                                    if (!checkIfExists(img.getId())) {
-
-                                        if (img.getType().contains("video")){
-                                            if( downloadVideo){
-
-                                                realm.beginTransaction();
-                                                realm.where(User.class).equalTo("id", userId).findAll().first().addItem(img);
-
-                                                realm.commitTransaction();
-                                                AltexImageDownloader.writeToDisk(MyApplication.getAppContext(), img.getAlt_media_url(), volleyUrl.split("/")[3].trim() + "/");
-                                            }
-
-                                        } else {
-                                            realm.beginTransaction();
-                                            realm.where(User.class).equalTo("id", userId).findAll().first().addItem(img);
-
-                                            realm.commitTransaction();
-                                            if (hdBool) {
-                                                AltexImageDownloader.writeToDisk(MyApplication.getAppContext(), img.getImages().getStandard_resolution().getUrl().replace("s640x640", "s1080x1080"), volleyUrl.split("/")[3].trim() + "/");
-                                            }
-                                            else{
-                                                AltexImageDownloader.writeToDisk(MyApplication.getAppContext(), img.getImages().getStandard_resolution().getUrl(), volleyUrl.split("/")[3].trim() + "/");
-
-                                            } }
-                                    }
-
-                                }
-                            }
-                        } catch (JSONException e) {
-                            Log.e("TAG", e.toString());
-                        }
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // TODO Auto-generated method stub
-
-
-                    }
-                });
-
-        // Access the RequestQueue through your singleton class.
-        VolleySingleton.getInstance().getRequestQueue().add(jsObjRequest);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         mAdapter.notifyDataSetChanged();
-    }
-
-    public  boolean checkIfExists(String id){
-
-        RealmQuery<ImageData> query = realm.where(ImageData.class)
-                .equalTo("id", id);
-
-        return query.count() != 0;
     }
 }

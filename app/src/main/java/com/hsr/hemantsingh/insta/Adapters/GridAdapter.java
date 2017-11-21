@@ -1,9 +1,6 @@
 package com.hsr.hemantsingh.insta.Adapters;
 
 import android.content.Context;
-import android.media.ThumbnailUtils;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,8 +10,6 @@ import android.widget.ImageView;
 import com.hsr.hemantsingh.insta.R;
 import com.hsr.hemantsingh.insta.listeners.CustomItemClickListener;
 import com.squareup.picasso.Picasso;
-
-import java.io.File;
 
 /**
  * Created by HemantSingh on 25/10/16.
@@ -78,34 +73,12 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        // - get element from your dataset at this position
-        // - replace the contents of the view with that element
 
-//        AltexImageDownloader.readFromDiskAsync(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-//                + "/" + mDataset.get(0).getUser().getUsername() + "/" + folder.list()[position]), new AltexImageDownloader.OnImageReadListener() {
-//            @Override
-//            public void onImageRead(Bitmap bitmap) {
-//                holder.imgageView.setImageBitmap(bitmap);
-//            }
-//
-//            @Override
-//            public void onReadFailed() {
-//
-//            }
-//        });
 
-        if (position < mFileset.length) {
-            if (mFileset[position].contains(".mp4")) {
-                holder.imgageView.setImageBitmap(ThumbnailUtils.createVideoThumbnail(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                                + "/" + folderName + "/" + mFileset[position],
-                        MediaStore.Images.Thumbnails.MINI_KIND));
 
-            } else {
-                Picasso.with(context).load(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                        + "/" + folderName + "/" + mFileset[position])).resize(320, 320).into(holder.imgageView);
-            }
+                Picasso.with(context).load(mFileset[position]).resize(320, 320).into(holder.imgageView);
 
-        }
+
     }
 
     // Return the size of your dataset (invoked by the layout manager)

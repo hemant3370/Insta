@@ -1,7 +1,6 @@
 package com.hsr.hemantsingh.insta.Activities;
 
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -16,8 +15,6 @@ import android.widget.VideoView;
 import com.hsr.hemantsingh.insta.R;
 import com.hsr.hemantsingh.insta.playpause.PlayPauseView;
 import com.squareup.picasso.Picasso;
-
-import java.io.File;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 
@@ -143,7 +140,7 @@ public class ImageTabsActivity extends AppCompatActivity {
                 mAttacher = new PhotoViewAttacher(imageView);
 //                imageView.setImageBitmap(AltexImageDownloader.readFromDisk(new File(this.getArguments().getString(ARG_SECTION_URL))));
 //                mAttacher.update();
-                 Picasso.with(getContext()).load(new File(this.getArguments().getString(ARG_SECTION_URL))).into(imageView);
+                 Picasso.with(getContext()).load(this.getArguments().getString(ARG_SECTION_URL)).into(imageView);
                 mAttacher.update();
 //                AltexImageDownloader.readFromDiskAsync(new File(this.getArguments().getString(ARG_SECTION_URL)), new AltexImageDownloader.OnImageReadListener() {
 //                    @Override
@@ -211,8 +208,7 @@ public class ImageTabsActivity extends AppCompatActivity {
             // Return a PlaceholderFragment (defined as a static inner class below).
 
 
-            return PlaceholderFragment.newInstance(position ,Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
-                    + "/" + userName +"/" + imgNameList[position]);
+            return PlaceholderFragment.newInstance(position , imgNameList[position]);
         }
 
         @Override
