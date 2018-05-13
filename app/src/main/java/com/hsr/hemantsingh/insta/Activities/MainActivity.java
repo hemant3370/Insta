@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity  {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        mRecyclerView = findViewById(R.id.my_recycler_view);
         mRecyclerView.setHasFixedSize(true);
         Realm.init(getApplicationContext());
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder().name(Realm.DEFAULT_REALM_NAME)
@@ -326,7 +326,7 @@ public class MainActivity extends AppCompatActivity  {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // TODO Auto-generated method stub
-                        pd.setTitle(error.getMessage());
+                        pd.setMessage(error.getLocalizedMessage());
 
                     }
                 });
@@ -368,7 +368,7 @@ public class MainActivity extends AppCompatActivity  {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -387,7 +387,7 @@ public class MainActivity extends AppCompatActivity  {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_edit) {
+        if (id == R.id.action_edit && mAdapter != null) {
             mAdapter.editMode = true;
             mAdapter.notifyDataSetChanged();
             addFab.setVisibility(View.GONE);
@@ -409,10 +409,6 @@ public class MainActivity extends AppCompatActivity  {
             return true;
         }
 
-        if (id == R.id.action_settings){
-           Intent miIntent = new Intent(MainActivity.this, SettingsActivity.class);
-            startActivity(miIntent);
-        }
 
         return super.onOptionsItemSelected(item);
     }
